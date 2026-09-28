@@ -7,6 +7,37 @@ Runtime: MiniMax Code on Windows 11
 
 This repository documents an early real-world stress test of MiniMax M3.1 Flash Preview one day after its preview release. It is **not an official MiniMax benchmark** and not a controlled academic leaderboard. The goal was to test whether the model can coordinate agents, build and debug a non-trivial application, research its own model, inspect a real workstation, distinguish product bugs from bad tests, and report blocked work without inventing success.
 
+## Quick decision support: should I buy the Token Plan or use API billing?
+
+This repository is meant to help with exactly that decision, but it does **not** give a universal buy/no-buy recommendation.
+
+**Observed in this run:** M3.1 Flash Preview was capable of a long, tool-heavy engineering task with real multi-agent delegation, browser work, code generation, debugging, research and recovery from blocked tooling. It also made non-trivial mistakes: a real rendering defect, several bad test oracles, an incorrect research claim, and an initial agent-role mismatch. The most positive behavior was that it usually distinguished broken tests from correct product code instead of blindly changing the code to make red tests green.
+
+**Operator note:** after this test, the operator purchased the **$20/month MiniMax Plus Token Plan** for further use. That is a personal follow-up decision, not a benchmark verdict or recommendation.
+
+### Token Plan vs. pay-as-you-go at publication time
+
+Official MiniMax pricing checked on 2026-09-28:
+
+| Route | Current published information | Practical implication |
+|---|---|---|
+| Token Plan Plus | **$20/month** | Lowest-cost official subscription tier; shared quota, MiniMax Code included |
+| Token Plan Max | **$50/month** | Higher quota / more concurrency |
+| Token Plan Ultra | **$120/month** | Highest individual quota / concurrency |
+| Token Plan API access | Subscription key can be used with supported coding tools / OpenAI-compatible integrations | Useful if you want M3-class models inside your own tools without normal PAYG billing |
+| PAYG MiniMax-M3 ≤512k input | **$0.30/M input, $1.20/M output, $0.06/M cache read** | Metered standard API route |
+| PAYG MiniMax-M3 >512k input | **$0.60/M input, $2.40/M output, $0.12/M cache read** | Long-context M3 costs more |
+| PAYG MiniMax-M3.1-Flash-Preview | **No separate row was published on the official PAYG table when this report was updated** | Do not assume M3 PAYG prices apply to M3.1 |
+
+MiniMax also states that Token Plan quota is controlled by rolling **5-hour and weekly windows**, can be rate-limited during peak traffic, and is intended for individual interactive developer use; its own pricing page recommends PAYG for production workloads.
+
+Official pricing references:
+- https://platform.minimax.io/subscribe/token-plan
+- https://platform.minimax.io/docs/guides/pricing-paygo
+
+For this benchmark, the useful question is not just price per token: it is **cost per correctly accepted task after retries, verifier work and repairs**. This run shows that M3.1 can do substantial work, but still benefits from an independent reviewer.
+
+
 ## Headline result
 
 The model performed strongly on agentic engineering and truthfulness, but the run was not flawless.
@@ -80,6 +111,38 @@ Observed on the same workstation:
 - n8n live database.sqlite existed at about 9 MB during verification.
 
 These checks do **not** prove that every retrieval path or n8n workflow is healthy end-to-end. See the reports for boundaries.
+
+
+
+## Other early M3.1 / likely-M3.1 reports
+
+This repository is not the only early test. The reports below measure different things and should not be treated as directly comparable scores.
+
+| Report | Scope | What it measures well | Main limitation relative to this repo |
+|---|---|---|---|
+| [bborbe/coding — M3.1 PR-review run](https://github.com/bborbe/coding/blob/9e401e103e047fa5778b0aaf5143b99ee3dbaf0d/bench/reports/b39175fb4ef92c2acf9208e1def7f0786e05eb9fd3d4bbcbf369a374bbde157c.md) | 19/20 real PR-review fixtures, 142 golden findings in scope | Very detailed code-review benchmark with per-PR results, recall/precision, hashes and wall time | Narrower task type; does not test full workstation orchestration or six-agent repair loops |
+| [eastspire/MiniMax-M3.1-Flash-Preview-mc](https://github.com/eastspire/MiniMax-M3.1-Flash-Preview-mc) | Large browser voxel/Minecraft-style build | Strong evidence that M3.1 can build a substantial interactive code artifact with browser test tooling | Primarily an artifact/build showcase, not a truthfulness/system-audit benchmark |
+| [AICodeKing / KingBench 3 analysis](https://www.elma.sh/blog/minimax-m3-1-flash-review) | Eight interactive app-generation tasks | Useful hands-on interaction testing; reported 53/80 (66.25%) in that test format | Secondary write-up of one underlying benchmark run, not the same methodology as this repo |
+| [MoEl80/space-bunny-alpha-eval](https://github.com/MoEl80/space-bunny-alpha-eval) | Seven scored single-shot tasks, two runs each, frozen prompts and raw outputs | Methodically clean small screening; also caught grader mistakes | Space Bunny Alpha's exact checkpoint/provider identity is not proven, so treat as a proxy rather than confirmed M3.1 |
+| [TechGoGo M3.1 test](https://www.techgogogo.com/2026/09/28/minimax-m3-1-flash-benchmark-report/) | Direct MiniMax Code task testing | Early direct behavior observations on instruction following and generated artifacts | Smaller scope and less runtime/evidence instrumentation |
+| [CLAW-00 / Da-Claw research note](https://da-claw-journal.sea-lion.ai/research/minimax-m3-1-flash-preview-quiet-launch-coding-agent-stealth-benchmark-2026-09-28) | Launch research, access, speed/community evidence, Space Bunny discussion | Broad early ecosystem synthesis | Research synthesis rather than a controlled full end-to-end workstation test |
+
+### What is unusual about this repository
+
+I have not found another public M3.1 report yet that combines all of the following in one run:
+
+- six real child-agent sessions with runtime evidence;
+- overlapping multi-agent work;
+- a non-trivial application built from scratch;
+- browser verification;
+- an externally discovered product bug followed by a repair round;
+- explicit separation of product failures, test-oracle failures and harness failures;
+- correction of the model's own research claim;
+- inspection of a live Obsidian / Mnemosyne / MemFTS / n8n environment;
+- independent PC-side reruns after the model's own shell path was blocked.
+
+That is a statement about the public reports found as of **2026-09-28**, not a claim of being the first benchmark of M3.1.
+
 
 ## Repository guide
 
