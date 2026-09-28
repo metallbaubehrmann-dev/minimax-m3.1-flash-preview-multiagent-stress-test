@@ -89,7 +89,7 @@ These checks do **not** prove that every retrieval path or n8n workflow is healt
 - prompts/original_stress_test.md — original stress-test prompt
 - evidence/ — raw final test output and agent/session evidence
 - reports/ — model research and local-system audit reports
-- screenshots/ — browser evidence
+- Browser screenshots remain in the local evidence archive; the initial public release focuses on code, raw test outputs, session metadata, and reports.
 ## Reproduction
 
 Requirements: Node.js capable of ESM modules and a modern browser.
