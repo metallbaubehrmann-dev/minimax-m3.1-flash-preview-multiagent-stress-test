@@ -1,0 +1,440 @@
+{
+  "register_version": "1.0",
+  "created": "2026-09-28",
+  "author_role": "A5 — Researcher/Quellen",
+  "packages": {
+    "PAKET1_MODELL": ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16", "C17", "C18", "C19", "C20"],
+    "PAKET2_ASTRONOMIE": ["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12", "A13", "A14", "A15", "A16"]
+  },
+  "method_note": "VERIFIZIERT nur, wenn die Originalseite geoeffnet und die Aussage dort woertlich gelesen wurde. Suchtreffer-Snippets sind kein Beleg. Herstellerbehauptung (hersteller), unabhaengige Messung (unabhaengige_messung), Einzelerfahrung (einzelerfahrung) und Forum (forum) sind getrennt gefuehrt. Widersprueche bleiben sichtbar.",
+  "review_round_2_korrekturen": {
+    "datum": "2026-09-28",
+    "pruefer": "A6 - Research-Reviewer, unabhaengig vom Ersteller der Registereintraege",
+    "hinweis": "Die urspruenglichen Claim-Eintraege bleiben unveraendert erhalten. Diese Korrekturen ueberschreiben sie. Belegdatei: review_round_2/A6_research_review.md und review_round_2/A6_claim_corrections.json.",
+    "korrekturen": [
+      {
+        "claim_id": "C12",
+        "old_claim": "Es gibt keinen API-Endpunkt, den Entwickler direkt aufrufen koennen.",
+        "new_claim": "FALSCH. Zwei offizielle Endpunkte sind dokumentiert und direkt aufrufbar: Anthropic-kompatibel https://api.minimax.io/anthropic und OpenAI-kompatibel https://api.minimax.io/v1, jeweils mit Modell-ID MiniMax-M3.1-Flash-Preview.",
+        "why_changed": "Zwei Sachverhalte wurden zu einem Claim verdichtet: es fehlt ein Per-Token-Preis, und daraus wurde ein fehlender Zugang gefolgert. Der urspruengliche Beleg war ein Sekundaerartikel (StartupFortune), der als forum gefuehrt wurde, obwohl OrcaRouter seine Aussage selbst auf den Vortag begrenzte.",
+        "source": "https://platform.minimax.io/docs/api-reference/text-anthropic-api.md und https://platform.minimax.io/docs/api-reference/text-openai-api.md",
+        "verdict": "WIDERLEGT"
+      },
+      {
+        "claim_id": "C10",
+        "old_claim": "Zugang nur ueber Token Plan und MiniMax Code; kein Pay-as-you-go und kein oeffentlicher API-Endpunkt.",
+        "new_claim": "TEILWEISE KORRIGIERT. Zugang nur ueber Token Plan und MiniMax Code ist richtig und herstellerbelegt. Kein Pay-as-you-go-Zugang ist richtig. Der Zusatz kein oeffentlicher API-Endpunkt ist falsch und entfaellt.",
+        "why_changed": "Der Claim verband eine zutreffende Zugaussage mit einer unzutreffenden. Herstellerwortlaut: available only through Token Plan and MiniMax Code for now.",
+        "source": "https://platform.minimax.io/docs/token-plan/intro.md",
+        "verdict": "TEILWEISE_WIDERLEGT"
+      },
+      {
+        "claim_id": "C11",
+        "old_claim": "Planstufe MAX mit 200 USD/Monat fuer MiniMax - OFFEN, keine Quelle belegt sie.",
+        "new_claim": "AUFGELOEST UND WIDERLEGT. Der MiniMax-Token-Plan kennt Plus 22 USD, Max 55 USD und Ultra 132 USD pro Monat. Eine 200-USD-Stufe gehoert nicht dazu. WICHTIG: Das ist die MiniMax-Planstufe und nicht die Anthropic-Planstufe des Nutzers; die beiden sind nicht gleichzusetzen.",
+        "why_changed": "Der Quellenzugriff war am 2026-09-28 moeglich, blieb im ersten Lauf aber unausgenutzt. Max umfasst 4 bis 5 Agenten sowie ein rollierendes 5-Stunden- und Wochenfenster.",
+        "source": "https://platform.minimax.io/docs/pricing-token-plan.md und https://platform.minimax.io/docs/token-plan/intro.md",
+        "verdict": "WIDERLEGT"
+      },
+      {
+        "claim_id": "C13",
+        "old_claim": "Fuer M3.1-Flash-Preview ist kein Per-Token-Preis veroeffentlicht.",
+        "new_claim": "BESTAETIGT, aber schaerfer gefasst: In der PAYG-Preisliste fehlt jede Zeile fuer M3.1-Flash-Preview. Diese Zahl darf NICHT mit einem fehlenden Zugang verknuepft werden - der Endpunkt existiert, siehe C12.",
+        "why_changed": "Der Befund war richtig, seine Verknuepfung mit der Zugangsaussage war es nicht.",
+        "source": "https://platform.minimax.io/docs/pricing-paygo.md",
+        "verdict": "VERIFIZIERT_EINGESCHRAENKT"
+      },
+      {
+        "claim_id": "C08",
+        "old_claim": "Die vollstaendige effort-Leiter war ABGELEITET, die Stufe xhigh ungelesen.",
+        "new_claim": "HOCHGESTUFT AUF VERIFIZIERT. Woertlich dokumentiert sind low, medium, high, xhigh und max, Standard ist max.",
+        "why_changed": "Der fruehere Beleg brach im externalisierten Artefakt mitten im Satz ab, deshalb wurde die Leiter nur abgeleitet. Die Primaerquelle traegt sie woertlich.",
+        "source": "https://platform.minimax.io/docs/api-reference/text-openai-api.md und text-anthropic-api.md",
+        "verdict": "VERIFIZIERT"
+      },
+      {
+        "claim_id": "C-ERGAENZUNG-TOOLUSE",
+        "old_claim": "Tool Use war OFFEN.",
+        "new_claim": "VERIFIZIERT. Der Typ tool_use ist voll unterstuetzt, ebenso der Parameter tools; die Dokumentation nennt MiniMax-M3.1-Flash-Preview im Abschnitt Tool Use and Interleaved Thinking ausdruecklich.",
+        "why_changed": "Im ersten Lauf nicht belegt, jetzt primaerquellenbelegt.",
+        "source": "https://platform.minimax.io/docs/api-reference/text-anthropic-api.md",
+        "verdict": "VERIFIZIERT"
+      }
+    ],
+    "drei_wege_trennung": "Endpunkt existiert ist NICHT gleich PAYG-Zugang. Token Plan ist NICHT gleich PAYG-API. Kein publizierter Preis ist NICHT gleich kein Zugang. Herstellerwortlaut: The Subscription Key is not interchangeable with pay-as-you-go API Keys.",
+    "offen_bleibend": "Das Kontingent wird in der Konsole nur als usage bar angezeigt, nicht als Tokenzahl; ein Kontingentvergleich zwischen Modellen ist damit derzeit nicht nachweisbar. Ebenso offen, ob M3.1 in der Coverage-Fussnote des Token-Plans (M3 / M2.7 / image / speech) enthalten ist."
+  },
+  "claims": [
+    {
+      "claim_id": "C01",
+      "claim": "Offizielle Modell-ID laut Hersteller: MiniMax-M3.1-Flash-Preview; sie denkt vor der Antwort in Schritten.",
+      "source_url": "https://platform.minimax.io/docs/guides/text-generation",
+      "source_kind": "hersteller",
+      "source_date": "2026-09-28",
+      "quote": "MiniMax-M3.1-Flash-Preview reasons before it answers, breaking a complex problem into steps before producing a response. This measurably improves accuracy on agentic reasoning, tool use, coding, and maths. Thinking is on by default and needs no configuration.",
+      "verdict": "VERIFIZIERT",
+      "note": "Herstellerdokumentation am 2026-09-28 geoeffnet; Text im externalisierten Artefakt per grep woertlich nachgelesen. 'measurably improves accuracy' ist eine Herstellerbehauptung ohne veroeffentlichten Beleg."
+    },
+    {
+      "claim_id": "C02",
+      "claim": "Status ist Preview, nicht Release. Veroeffentlichungsdatum 2026-09-27.",
+      "source_url": "https://models.dev/models/minimax/MiniMax-M3.1-Flash-Preview/",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-27",
+      "quote": "<h2>MiniMax-M3.1-Flash-Preview</h2> ... <div><dt>Context</dt><dd>1,000,000</dd></div><div><dt>Output limit</dt><dd>512,000</dd></div><div><dt>Knowledge</dt><dd>-</dd></div><div><dt>Release</dt><dd>2026-09-27</dd></div><div><dt>Updated</dt><dd>2026-09-27</dd></div>",
+      "verdict": "VERIFIZIERT",
+      "note": "Der Suffix '-Preview' im Modellnamen selbst traegt diese Einordnung. OrcaRouter nennt es unabhaengig 'a released Preview coding model'."
+    },
+    {
+      "claim_id": "C03",
+      "claim": "MiniMax hat fuer M3.1-Flash-Preview kein Model Card, keine Benchmarkzahlen und keine oeffentliche Preisangabe veroeffentlicht.",
+      "source_url": "https://startupfortune.com/minimax-slips-a-new-coding-model-into-its-agent-tool-without-a-price-tag/",
+      "source_kind": "forum",
+      "source_date": "2026-09-28",
+      "quote": "MiniMax launched M3.1-Flash-Preview inside its MiniMax Code agent tool on September 27, 2026, with no model card, no benchmark report and no public pricing. ... That's the entire announcement.",
+      "verdict": "VERIFIZIERT",
+      "note": "Autor Walter Schulweisse (Walter Schulze), datePublished 2026-09-28T02:25:10+05:30, auf der Seite sichtbares Excerpt. Unabhaengig bestaetigt durch OrcaRouter (Elias Hawthorne, 2026-09-27T23:50:35Z)."
+    },
+    {
+      "claim_id": "C04",
+      "claim": "Kontextfenster 1.000.000 Token, Ausgabelimit 512.000 Token.",
+      "source_url": "https://models.dev/models/minimax/MiniMax-M3.1-Flash-Preview/",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-27",
+      "quote": "Frontier multimodal coding model with 1M context window and tunable thinking depth. Compare MiniMax-M3.1-Flash-Preview from MiniMax across 2 providers. Specs include 1,000,000 token context; 512,000 token output; $0.00 / $0.00 per 1M tokens; input: text, image, video.",
+      "verdict": "VERIFIZIERT",
+      "note": "Einziger unabhaengiger Spezifikationswert. Der 0.00-Teil dieser Zeile ist KEIN Preis, sondern die Quotientendarstellung der Token-Plan-Provider — siehe C10/C11."
+    },
+    {
+      "claim_id": "C05",
+      "claim": "Eingangsmodalitaeten Text, Bild, Video; Ausgabe nur Text.",
+      "source_url": "https://models.dev/models/minimax/MiniMax-M3.1-Flash-Preview/",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-27",
+      "quote": "<div><dt>Input</dt><dd>...data-tooltip=\"Text\"... <span class=\"modality-icon\" data-tooltip=\"Image\"> ... <span class=\"modality-icon\" data-tooltip=\"Video\">...</div><div><dt>Output types</dt><dd>...data-tooltip=\"Text\"...",
+      "verdict": "VERIFIZIERT",
+      "note": "Bestaetigt durch OrcaRouter: 'Input modalities - text, image and video, returning text'."
+    },
+    {
+      "claim_id": "C06",
+      "claim": "Dokumentierte Faehigkeiten: tools, reasoning, temperature.",
+      "source_url": "https://models.dev/models/minimax/MiniMax-M3.1-Flash-Preview/",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-27",
+      "quote": "<div><dt>Capabilities</dt><dd>tools, reasoning, temperature</dd></div>",
+      "verdict": "VERIFIZIERT",
+      "note": "'Capabilities' ist eine Funktions-Flag, keine Leistungsmessung."
+    },
+    {
+      "claim_id": "C07",
+      "claim": "Thinking ist dauerhaft aktiv und nicht abschaltbar; der Versuch zu deaktivieren liefert HTTP 400.",
+      "source_url": "https://platform.minimax.io/docs/guides/text-generation",
+      "source_kind": "hersteller",
+      "source_date": "2026-09-28",
+      "quote": "Thinking cannot be turned off. Sending `thinking: {\"type\": \"disabled\"}` or `effort: \"none\"` returns `400` ... To reduce the latency and token usage of thinking, lower the `effort` level rather than trying to disable thinking.",
+      "verdict": "VERIFIZIERT",
+      "note": "Konsequenz fuer den Test: eine A/B-Messung 'mit/ohne Reasoning' ist fuer dieses Modell konstruktiv unmoeglich. Jeder Lauf ist ein Reasoning-Lauf."
+    },
+    {
+      "claim_id": "C08",
+      "claim": "Reasoning-Tiefe ist protokollabhaengig benannt (output_config.effort / reasoning_effort / reasoning.effort); ohne Angabe ist der Standard max.",
+      "source_url": "https://platform.minimax.io/docs/guides/text-generation",
+      "source_kind": "hersteller",
+      "source_date": "2026-09-28",
+      "quote": "omitting `effort` defaults to `max` ... `output_config.effort` -> `thinking` content block ... `reasoning_effort` -> `reasoning_content` field ... `reasoning.effort` -> `type: \"reasoning\"` output item",
+      "verdict": "ABGELEITET",
+      "note": "Standard 'max' und die drei Feldnamen sind woertlich gelesen = VERIFIZIERT. Die vollstaendige Leiter ist es nicht: die Passage '`effort` accepts `low`, `medium`, `high`, `com...' bricht im Artefakt ab. Die Stufe 'xhigh' wurde NICHT direkt gelesen; sie stuetzt sich auf OrcaRouter ('max-to-low ladder, which matches the shipped values exactly') und auf die Laufzeiteinstellung thinking.effort=max. Nicht geraten."
+    },
+    {
+      "claim_id": "C09",
+      "claim": "Thinking-Inhalt wird getrennt von der Antwort zurueckgegeben (reasoning_content vs content).",
+      "source_url": "https://platform.minimax.io/docs/guides/text-generation",
+      "source_kind": "hersteller",
+      "source_date": "2026-09-28",
+      "quote": "Thinking content comes back separately from the answer: on the OpenAI-compatible protocol, thinking is always returned on `reasoning_content` while `content` holds only the final answer, ready to display without parsing it out of `<think>` tags.",
+      "verdict": "VERIFIZIERT",
+      "note": "Relevanter als es zuerst aussieht: eine Auswertung, die nur `content` liest und die Antwort als 'nicht geliefert' wertet, wertet das Modell falsch."
+    },
+    {
+      "claim_id": "C10",
+      "claim": "Zugang nur ueber Token Plan und MiniMax Code; kein Pay-as-you-go und kein oeffentlicher API-Endpunkt. models.dev listet ausschliesslich zwei Token-Plan-Provider.",
+      "source_url": "https://www.orcarouter.ai/blog/minimax-m3-1-flash-preview-token-plan",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-27",
+      "quote": "MiniMax-M3.1-Flash-Preview itself is not on our catalogue, and the way to reach it today is the vendor's own Token Plan and its coding product. ... MiniMax-M3.1-Flash-Preview is not on pay-as-you-go",
+      "verdict": "VERIFIZIERT",
+      "note": "Autor Elias Hawthorne (OrcaRouter), publishedAt 2026-09-27T23:50:35.633Z. Katalogseitig bestaetigt: models.dev zeigt genau zwei Provider, beide 'MiniMax Token Plan (minimax.cn) minimax-cn-coding-plan' und 'MiniMax Token Plan (minimax.io) minimax-coding-plan'. OrcaRouter ist selbst ein Routing-Anbieter und damit kommerzielle Partei — die Aussage 'not on our catalogue' ist belastbar, Kostenaussagen sind es nicht."
+    },
+    {
+      "claim_id": "C11",
+      "claim": "'Im Token-Plan enthalten' ist NICHT gleichwertig mit einem MAX-Plan-Kontingent. Die Behauptung 'Nutzer sei auf einem MAX-Plan (200 USD/Monat)' ist durch diese Recherche nicht belegt.",
+      "source_url": "https://www.orcarouter.ai/blog/minimax-m3-1-flash-preview-token-plan",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-27",
+      "quote": "the model is live, free at the margin if you already pay for a Token Plan seat, and completely unpriced and unmeasured on its own terms.",
+      "verdict": "OFFEN",
+      "note": "Ungleichwertigkeit ABGELEITET ('at the margin' = keine Kosten, aber kein Kontingentversprechen; models.dev-$0.00/$0.00 ist eine Planquotient-Zelle, keine Preisangabe). Die konkrete Planstufe ist OFFEN: Es wurde keine Quelle geoeffnet, die eine Stufe 'MAX' mit 200 USD/Monat fuer MiniMax belegt. Die Token-Plan-Seite wurde abgerufen, das Artefakt war danach nicht mehr adressierbar (grep: path does not exist) — es wurde NICHTS aus Modellwissen ergaenzt. Kleinster naechster Schritt: Token-Plan-Seite neu abrufen, Preisliste tabellieren."
+    },
+    {
+      "claim_id": "C12",
+      "claim": "Es gibt keinen API-Endpunkt, den Entwickler direkt aufrufen koennen.",
+      "source_url": "https://startupfortune.com/minimax-slips-a-new-coding-model-into-its-agent-tool-without-a-price-tag/",
+      "source_kind": "forum",
+      "source_date": "2026-09-28",
+      "quote": "No model card, no benchmark numbers, no API endpoint developers can call directly.",
+      "verdict": "VERIFIZIERT",
+      "note": "Fliesstext der geoeffneten Seite. Konsistent mit C10 (zwei Quellen unabhaengig)."
+    },
+    {
+      "claim_id": "C13",
+      "claim": "Fuer M3.1-Flash-Preview ist kein Per-Token-Preis veroeffentlicht. Der kursierende Preis von $0.30/$1.20 gehoert zu M3, nicht zu M3.1.",
+      "source_url": "https://www.orcarouter.ai/blog/minimax-m3-1-flash-preview-token-plan",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-27",
+      "quote": "There is no per-token rate for M3.1-Flash-Preview on any MiniMax page, so it cannot be compared with M3's $0.30 per million input and $1.20 per million output, or with anything else, on cost per token.",
+      "verdict": "VERIFIZIERT",
+      "note": "VERIFIZIERT als 'nicht veroeffentlicht'. Es wurde KEINE Preisschaetzung und KEINE 0-$-Rechnung erstellt. Die $0.00/$0.00-Zelle bei models.dev darf nie ohne den Zusatz zitiert werden, dass sie die Token-Plan-Provider betrifft."
+    },
+    {
+      "claim_id": "C14",
+      "claim": "Stand 2026-09-28 existiert keine einzige unabhaengige Qualitaets-, Coding- oder Zuverlaessigkeitsmessung fuer M3.1-Flash-Preview.",
+      "source_url": "https://www.orcarouter.ai/blog/minimax-m3-1-flash-preview-token-plan",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-27",
+      "quote": "No independent measurement. No output-speed, latency or error-rate figures from any third party, and none from our own routing telemetry, because the model is not on our catalogue.",
+      "verdict": "VERIFIZIERT",
+      "note": "Verifiziert als Fehlen von Messung. Wichtig fuer den Test: es gibt derzeit KEINEN Referenzwert, gegen den eine eigene Qualitaetsmessung validiert werden koennte. Jede Zahl waere erfunden."
+    },
+    {
+      "claim_id": "C15",
+      "claim": "Einzelerfahrung (negativ): ein Forumsnutzer spaert keinen unterscheidbaren Effekt gegenueber M3 und weiss den Preis nicht.",
+      "source_url": "https://forum.trae.cn/t/topic/182583",
+      "source_kind": "einzelerfahrung",
+      "source_date": "2026-09-27",
+      "quote": "我简单的用了一下，没感觉和m3有啥变化，然后也不知道价格",
+      "verdict": "VERIFIZIERT",
+      "note": "Autor '斗战', Zeitstempel 2026-09-27T07:17:27Z, Thread 'MiniMax-M3.1-Flash-Preview上线'. Volltext gelesen. n=1, keine Aufgabenbeschreibung, kein Messverfahren — belegt Erfahrung, nicht Performance."
+    },
+    {
+      "claim_id": "C16",
+      "claim": "Zweite Einzelerfahrung (negativ): auch die offizielle MiniMax-Website lieferte keine verwertbare Information.",
+      "source_url": "https://forum.trae.cn/t/topic/182583",
+      "source_kind": "einzelerfahrung",
+      "source_date": "2026-09-27",
+      "quote": "包括Minimax官网，未能得到任何有用信息，暂时分析不了<br>就此前经验，Minimax卖过相当便宜的套餐<br>而这个版本打出了flash旗号，",
+      "verdict": "VERIFIZIERT",
+      "note": "Autor 'GeneralC', 2026-09-27T05:56:12Z. Unabhaengig von C15 und zeitlich frueher. Deckt sich inhaltlich mit C03/C13."
+    },
+    {
+      "claim_id": "C17",
+      "claim": "Positiver Erfahrungsbericht: in der geoeffneten Originalquelle existiert keiner. Die 7 Beitraege des Threads enthalten zwei Negativmeldungen und fuenf Nicht-Aussagen.",
+      "source_url": "https://forum.trae.cn/t/topic/182583",
+      "source_kind": "forum",
+      "source_date": "2026-09-28",
+      "quote": "看错了，以为是H3.1。 那么M3.1的性能如何？ / 代码模型啊 / 守门员终于上新了 / 不知道能力咋样",
+      "verdict": "VERIFIZIERT",
+      "note": "Volltext aller 7 Beitraege gelesen. Der kursierende positive Bericht ('generating detailed 3D models from images in an hour') betrifft 'Space Bunny Alpha', ein OpenRouter-Stealth-Modell — NICHT M3.1-Flash-Preview. Nicht als Erfahrungsbericht fuehren."
+    },
+    {
+      "claim_id": "C18",
+      "claim": "Ein Bewertungsportal fuehrt numerische Normalized-Scores, die ausdruecklich 'No data; neutral placeholder' sind — Default-Werte, keine Messung.",
+      "source_url": "https://opencode.ai/data/compare/minimax/minimax-m3/minimax/minimax-m3-1-flash-preview",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "unbekannt",
+      "quote": "|MiniMax-M3.1-Flash-Preview|50/100 — Reasoning supported; no comparable benchmark|50/100 — No data; neutral placeholder|100/100|80/100|50/100|50/100 — Tool calling supported; no comparable benchmark|",
+      "verdict": "ABGELEITET",
+      "note": "Diese Seite wurde NICHT als Originalseite geoeffnet, nur als Suchinhalt gelesen — daher ABGELEITET statt VERIFIZIERT. Inhaltlich warnrelevant: eine 50/100-Notation, die selbst 'No data; neutral placeholder' lautet, darf nicht als Testergebnis zitiert werden."
+    },
+    {
+      "claim_id": "C19",
+      "claim": "Keine veroeffentlichten Gewichte. Ein unabhaengiger Katalog fuehrt das Modell als 'Closed'.",
+      "source_url": "https://models.dev/models/minimax/MiniMax-M3.1-Flash-Preview/",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-27",
+      "quote": "<div><dt>Weights</dt><dd><span>Closed</span></dd></div>",
+      "verdict": "VERIFIZIERT",
+      "note": "Bestaetigt durch OrcaRouter: 'MiniMax-M3 shipped open-weight; M3.1-Flash-Preview has no repository and no downloadable checkpoint.'"
+    },
+    {
+      "claim_id": "C20",
+      "claim": "Es existiert nur eine geleakte Vorschau-Spezifikation plus ein behaupteter privater Platzhalter-Checkpoint — keine offizielle Gewichtsveroeffentlichung.",
+      "source_url": "https://www.orcarouter.ai/blog/minimax-m3-1-flash-preview-token-plan",
+      "source_kind": "forum",
+      "source_date": "2026-09-27",
+      "quote": "Four days before the launch, a preview document transcribed in a public partner repository circulated describing a MiniMax M3.1 with sparse attention, Q8KV4 attention quantisation, NVFP4 routed experts, a DSpark speculative-decoding head and a new reasoning_effort field taking values from max down to low. At the time we wrote it up as unverified, because it was: no weights, no model card, no pricing page and no API model id existed. ... Anyone repeating the sparse-attention and NVFP4 claims as settled specification is repeating a third party's transcription, which is exactly what the release did not confirm.",
+      "verdict": "VERIFIZIERT",
+      "note": "Als Bericht ueber ein Leak VERIFIZIERT; als Spezifikation des Modells OFFEN. Zusaetzlich als Bild-Alternativtext eines verwandten Artikels derselben Quelle: Checkpoint-Bezeichner 'MiniMax-M3.1-preview-private', '62 files / 48 safetensors / 250 GB'. MUST_CHECK: M3, M2.7, dieser behauptete Checkpoint und 'Space Bunny Alpha' sind ohne Identitaetsbeleg KEINE identischen Checkpoints und duerfen nicht als Testbasis dienen."
+    },
+
+    {
+      "claim_id": "A00",
+      "claim": "KONVENTIONEN fuer PAKET 2: Azimut = 0 Grad Norden, im Uhrzeigersinn (0=N, 90=O, 180=S, 270=W). Hoehe = geometrische Elevation ueber dem Horizont OHNE Atmosphaerenbrechung, sofern nicht 'apparent' vermerkt. Koordinaten 48,78 Grad N / 9,18 Grad E (Stuttgart), Zeitzone Europe/Berlin. Alle Zeitpunkte in UTC. Quellenabruf jeweils 2026-09-28.",
+      "source_url": "https://gml.noaa.gov/grad/antuv/SolarCalc.jsp",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "<b>Local UTC     SolarZen and Elev Uncorrected for Atmospheric Refaction / yyyy MM dd HH:mm     SolarZen       Elev       Azim</b> ... <dt>Azimuth:</dt> <dd>Sun azimuth, 0&deg; = N, 90&deg; = E, 180&deg; = S, 270&deg; = W. Toggle the checkbox to enable/disable column in report.",
+      "verdict": "VERIFIZIERT",
+      "note": "Grundkonvention aller unten zitierten NOAA-Zeilen. Quervergleich: NOAA glossary definiert dieselbe Konvention: 'Azimuth is measured clockwise from true north to the point on the horizon directly below the object.'"
+    },
+    {
+      "claim_id": "A01",
+      "claim": "Tagundnachtgleiche, Stuttgart 48,78N/9,18E, 2026-09-22 11:00 UTC: geometrische Hoehe +41,31272 Grad, Azimut 174,67144 Grad (S-Seite, vor Kulmination).",
+      "source_url": "https://gml.noaa.gov/grad/antuv/SolarCalc.jsp?lat=48.78&lon=-9.18&startdate=2026-09-22 00:00&enddate=2026-09-22 23:00&timezone=UTC&interval=3600",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026 09 22 11:00     48.68728   41.31272  174.67144",
+      "verdict": "VERIFIZIERT",
+      "note": "Konsistenzpruefung: Tagesmaximalhoehe am Aequator-Tag = 90 - 48,78 + delta = ca. 41,2 Grad. Passt. Toleranz gegenueber einer eigenen Engine: Hoehe +/-0,2 Grad, Azimut +/-0,5 Grad (Mittagsbereich, keine Brechungsnahae)."
+    },
+    {
+      "claim_id": "A02",
+      "claim": "Stuttgart 2026-09-22 05:00 UTC: geometrische Hoehe -2,41370 Grad, Azimut 86,76676 Grad — Sonne knapp unter dem Horizont, faellig zur Ostseite.",
+      "source_url": "https://gml.noaa.gov/grad/antuv/SolarCalc.jsp?lat=48.78&lon=-9.18&startdate=2026-09-22 00:00&enddate=2026-09-22 23:00&timezone=UTC&interval=3600",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026 09 22 05:00     92.41370   -2.41370   86.76676",
+      "verdict": "VERIFIZIERT",
+      "note": "Horizontnaher Fall. Hier ist die Brechung dominant: NOAA rechnet ohne Brechung, der Sonnenaufgang als 'apparent' (mit 0,833 Grad) faellt deshalb rund fuenf Minuten frueher. Toleranz: Hoehe +/-0,3 Grad, Azimut +/-1,0 Grad — in Horizontnae streng, sonst bei undurchsichtiger Wetterlage nicht testbar."
+    },
+    {
+      "claim_id": "A03",
+      "claim": "Stuttgart 2026-09-22 17:00 UTC: geometrische Hoehe +2,70889 Grad, Azimut 267,08358 Grad — knapp ueber Horizont, Westseite.",
+      "source_url": "https://gml.noaa.gov/grad/antuv/SolarCalc.jsp?lat=48.78&lon=-9.18&startdate=2026-09-22 00:00&enddate=2026-09-22 23:00&timezone=UTC&interval=3600",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026 09 22 17:00     87.29111    2.70889  267.08358",
+      "verdict": "VERIFIZIERT",
+      "note": "Spiegelfall zu A02. Direkte Querprobe mit A09/A10: die Null-Hoehe liegt laut NOAA-Zwischenwerten um ca. 05:15 UTC (apparent) — deckt sich mit USNO 05:10 und sunrise-sunset.org 05:08."
+    },
+    {
+      "claim_id": "A04",
+      "claim": "Lokale Mitternacht Stuttgart, 2026-09-22 22:00 UTC (= 23.09. 00:00 CEST): geometrische Hoehe -38,51486 Grad, Azimut 335,46583 Grad (NNW).",
+      "source_url": "https://gml.noaa.gov/grad/antuv/SolarCalc.jsp?lat=48.78&lon=-9.18&startdate=2026-09-22 00:00&enddate=2026-09-22 23:00&timezone=UTC&interval=3600",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026 09 22 22:00    128.51486  -38.51486  335.46583",
+      "verdict": "VERIFIZIERT",
+      "note": "Mitternachtsfall. WICHTIG: Mitternacht ist ein Lokalzeitbegriff, kein UTC-Begriff — 00:00 CEST ist 22:00 UTC, 00:00 CET waere 23:00 UTC. Toleranz Hoehe +/-0,3 Grad, Azimut +/-0,5 Grad."
+    },
+    {
+      "claim_id": "A05",
+      "claim": "Sonnenwende Stuttgart 2026-06-21 11:00 UTC: geometrische Hoehe +64,17461 Grad, Azimut 166,69233 Grad — nahe dem Tagesmaximum ('zenitnah' fuer diese Breite).",
+      "source_url": "https://gml.noaa.gov/grad/antuv/SolarCalc.jsp?lat=48.78&lon=-9.18&startdate=2026-06-21 10:00&enddate=2026-06-21 23:00&timezone=UTC&interval=3600",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026 06 21 11:00     25.82539   64.17461  166.69233",
+      "verdict": "VERIFIZIERT",
+      "note": "Konsistenzpruefung: Maximum bei Solstitium = 90 - 48,78 + 23,44 = 64,66 Grad. Der zitierte Wert ist 0,5 Grad darunter, weil 11:00 UTC nicht exakt die Kulmination (ca. 11:15 UTC) ist. Fuer den Kulminationspunkt selbst: Hoehe 64,6-64,7 Grad bei Azimut 180, Toleranz +/-0,2 Grad."
+    },
+    {
+      "claim_id": "A06",
+      "claim": "Sonnenwende Stuttgart 2026-06-21 19:00 UTC (= 21:00 CEST): Sonne noch +3,21331 Grad ueber Horizont, Azimut 302,71082 Grad (WNW).",
+      "source_url": "https://gml.noaa.gov/grad/antuv/SolarCalc.jsp?lat=48.78&lon=-9.18&startdate=2026-06-21 10:00&enddate=2026-06-21 23:00&timezone=UTC&interval=3600",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026 06 21 19:00     86.78669    3.21331  302.71082",
+      "verdict": "VERIFIZIERT",
+      "note": "Querprobe USNO (A11): Sonnenuntergang 21:30 CEST = 19:30 UTC. Um 19:00 UTC steht die Sonne noch oben — konsistent. Toleranz Hoehe +/-0,4 Grad, Azimut +/-1,5 Grad (flacher Einfall)."
+    },
+    {
+      "claim_id": "A07",
+      "claim": "Sommer-Mitternacht Stuttgart, 2026-06-21 22:00 UTC (= 00:00 CEST am 22.06.): geometrische Hoehe -15,31738 Grad, Azimut 339,78445 Grad — die Sonne ist nachts noech nicht unter den Horizont gegangen.",
+      "source_url": "https://gml.noaa.gov/grad/antuv/SolarCalc.jsp?lat=48.78&lon=-9.18&startdate=2026-06-21 10:00&enddate=2026-06-21 23:00&timezone=UTC&interval=3600",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026 06 21 22:00    105.31738  -15.31738  339.78445",
+      "verdict": "VERIFIZIERT",
+      "note": "Weicher als A04, weil die Sonne flach untergeht: Toleranz Hoehe +/-0,5 Grad, Azimut +/-2,0 Grad. Wer hier eine Reflexion zwischen 'Sonnenuntergang 19:30 UTC' und der tatsaechlichen Kurve verwechselt, baut den klassischen Sommerzeit-Bug."
+    },
+    {
+      "claim_id": "A08",
+      "claim": "Echter Zenitdurchgang: Aequator 0,0N/0,0E, 2026-09-22 12:00 UTC, Hoehe +88,16539 Grad, Zenitdistanz 1,83461 Grad. Azimut springt dabei von 83,98 Grad (11:45) auf 276,23 Grad (12:00).",
+      "source_url": "https://gml.noaa.gov/grad/antuv/SolarCalc.jsp?lat=0&lon=0&startdate=2026-09-22 11:00&enddate=2026-09-22 13:00&timezone=UTC&interval=900",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026 09 22 11:45      1.93780   88.06220   83.98211 / 2026 09 22 12:00      1.83461   88.16539  276.23026 / 2026 09 22 12:15      5.57810   84.42190  272.00668",
+      "verdict": "VERIFIZIERT",
+      "note": "KRITISCHER EDGE CASE fuer jede Engine: innerhalb weniger Grad Zenitdistanz ist das Azimut instabil und springt ueber die 0/360-Grenze. Fuer diese Zone KEINE Azimut-Toleranz zulassen, sondern nur die Hoehe pruefen: Hoehe >= 88,0 Grad im Fenster 11:45-12:15 UTC. Eine Engine, die hier 'Azimut stimmt nicht', ist nicht kaputt — sie ist richtig."
+    },
+    {
+      "claim_id": "A09",
+      "claim": "Apparent Sonnenauf-/untergang und Sonnenkulmination Stuttgart 2026-09-22 (Europe/Berlin, CEST): Buergerliche Daemmerung 06:38, Aufgang 07:10, Kulmination 13:16, Untergang 19:21, Ende 19:53 (Ortszeit, Minute).",
+      "source_url": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-09-22&coords=48.78,9.18&tz=2",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "\"sundata\": [{\"phen\": \"Begin Civil Twilight\", \"time\": \"06:38\"}, {\"phen\": \"Rise\", \"time\": \"07:10\"}, {\"phen\": \"Upper Transit\", \"time\": \"13:16\"}, {\"phen\": \"Set\", \"time\": \"19:21\"}, {\"phen\": \"End Civil Twilight\", \"time\": \"19:53\"}], \"tz\": 2.0",
+      "verdict": "VERIFIZIERT",
+      "note": "US Naval Observatory, apiversion 4.0.1. APPARENT (mit Brechung), Minutenaufloesung. In UTC: 04:38 / 05:10 / 11:16 / 17:21 / 17:53. Toleranz gegen eine eigene Engine: +/-2 min gegen USNO, +/-3 min als Vereinigungsmenge aller drei Quellen."
+    },
+    {
+      "claim_id": "A10",
+      "claim": "Unabhaengige Querprobe Sunrise-Sunset.org, Stuttgart 2026-09-22: Aufgang 05:08:23 UTC, Untergang 17:23:36 UTC, Sonnenhöhepunkt 11:15:59 UTC, Tageslaenge 44113 s, buergerliche Daemmerung 04:38:32 / 17:53:27 UTC.",
+      "source_url": "https://api.sunrise-sunset.org/json?lat=48.78&lng=9.18&date=2026-09-22&formatted=0",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "{\"results\":{\"sunrise\":\"2026-09-22T05:08:23+00:00\",\"sunset\":\"2026-09-22T17:23:36+00:00\",\"solar_noon\":\"2026-09-22T11:15:59+00:00\",\"day_length\":44113,\"civil_twilight_begin\":\"2026-09-22T04:38:32+00:00\",\"civil_twilight_end\":\"2026-09-22T17:53:27+00:00\",\"nautical_twilight_begin\":\"2026-09-22T04:01:26+00:00\",\"nautical_twilight_end\":\"2026-09-22T18:30:33+00:00\",\"astronomical_twilight_begin\":\"2026-09-22T03:23:03+00:00\",\"astronomical_twilight_end\":\"2026-09-22T19:08:55+00:00\"},\"status\":\"OK\"}",
+      "verdict": "VERIFIZIERT",
+      "note": "Sekundengenaue, unabhaengig von USNO und NOAA. WIDERSPRUCH BLEIBT SICHTBAR: Aufgang 05:08:23 (sunrise-sunset.org) vs 05:10 (USNO) = 1,6 min; Untergang 17:23:36 vs 17:21 = 2,6 min; Kulmination 11:15:59 vs 11:16 = 18 s. Nicht glaetten — die Toleranz muss beide einschliessen."
+    },
+    {
+      "claim_id": "A11",
+      "claim": "Sonnenwenden Stuttgart: 2026-06-21 apparent Aufgang 05:20, Kulmination 13:25, Untergang 21:30 CEST (Tagelaenge 16 h 10 min); 2026-12-21 apparent Aufgang 08:14, Kulmination 12:21, Untergang 16:29 CET (Tagelaenge 8 h 15 min).",
+      "source_url": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-06-21&coords=48.78,9.18&tz=2",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026-06-21: {\"phen\": \"Rise\", \"time\": \"05:20\"}, {\"phen\": \"Upper Transit\", \"time\": \"13:25\"}, {\"phen\": \"Set\", \"time\": \"21:30\"}  ...  2026-12-21: {\"phen\": \"Rise\", \"time\": \"08:14\"}, {\"phen\": \"Upper Transit\", \"time\": \"12:21\"}, {\"phen\": \"Set\", \"time\": \"16:29\"}, \"tz\": 1.0",
+      "verdict": "VERIFIZIERT",
+      "note": "Zwei getrennte API-Aufrufe (tz=2 bzw. tz=1). Kulmination in UTC: 11:25 bzw. 11:21 — die Tageslenge aendert sich, der Sonnenhöhepunkt in UTC praktisch nicht. Genau das ist der Test fuer die Trennung von Sonnenstand und Uhrzeitverschiebung."
+    },
+    {
+      "claim_id": "A12",
+      "claim": "Hoher Breitengrad Tromsoe 69,65N/18,96E: 2026-06-21 Mitternachtssonne (Objekt dauerhaft ueber Horizont, untere Kulmination 00:46, obere 12:46 CEST); 2026-12-21 Polarnacht (Objekt dauerhaft unter Horizont, buergerliche Daemmerung 09:31-13:53 CET, untere Kulmination 08:53, obere 21:24).",
+      "source_url": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-06-21&coords=69.65,18.96&tz=2",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026-06-21: {\"phen\": \"Object continuously above the Horizon\", \"time\": null}, {\"phen\": \"Lower Transit\", \"time\": \"00:46\"}, {\"phen\": \"Upper Transit\", \"time\": \"12:46\"}  ...  2026-12-21: {\"phen\": \"Object continuously below the Horizon\", \"time\": null}, {\"phen\": \"Begin Civil Twilight\", \"time\": \"09:31\"}, {\"phen\": \"End Civil Twilight\", \"time\": \"13:53\"}, {\"phen\": \"Lower Transit\", \"time\": \"08:53\"}, {\"phen\": \"Upper Transit\", \"time\": \"21:24\"}",
+      "verdict": "VERIFIZIERT",
+      "note": "Tromsoe liegt mit 69,65 Grad innerhalb der +/-72-Grad-Zone, fuer die NOAA eine Genauigkeit von etwa einer Minute behauptet. Testbare Aussage ist zunaechst nur die qualitative: kein Aufgang, kein Untergang, sondern 'dauerhaft'. Kulminationszeiten +/-5 min. Extremfaelle jenseits 72 Grad (z. B. Spitzbergen) sind hier NICHT abgedeckt — dort waere die Genauigkeit laut NOAA nur noch 10 min."
+    },
+    {
+      "claim_id": "A13",
+      "claim": "Sommerzeitumstellung Stuttgart: 2026-03-29 (Umstellung vorwärts, CEST) apparent Aufgang 07:08, Kulmination 13:28, Untergang 19:49; 2026-10-25 (Umstellung rueckwaerts, CET) apparent Aufgang 06:59, Kulmination 12:07, Untergang 17:15.",
+      "source_url": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-03-29&coords=48.78,9.18&tz=2",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026-03-29: {\"phen\": \"Rise\", \"time\": \"07:08\"}, {\"phen\": \"Upper Transit\", \"time\": \"13:28\"}, {\"phen\": \"Set\", \"time\": \"19:49\"}  ...  2026-10-25: {\"phen\": \"Rise\", \"time\": \"06:59\"}, {\"phen\": \"Upper Transit\", \"time\": \"12:07\"}, {\"phen\": \"Set\", \"time\": \"17:15\"}, \"tz\": 1.0",
+      "verdict": "VERIFIZIERT",
+      "note": "Kernbefund: An beiden Umstellungstagen liegt die Kulmination in UTC bei 11:28 bzw. 11:07 UTC — die Zeitgleichung bewegt sich, die Zone nicht. Der Ortszeit-Unterschied von 81 bzw. 21 Minuten entfaellt fast vollstaendig aus der Zone (60 min) und dem Tagesgang. Wer Ortszeit-Sonnenuntergang mit 25-Stunden-Tag verrechnet, erzeugt den klassischen Fehler. 2026-03-29 hat in Ortszeit 25 Stunden, 2026-10-25 hat 25 Stunden."
+    },
+    {
+      "claim_id": "A14",
+      "claim": "Zeitgleichung (abgeleitet): +7 min 18 s am 22.09., -1 min 43 s am 21.06., +2 min 17 s am 21.12., -13 min 43 s am 11.02., +16 min 17 s am 03.11.2026 (jeweils Stuttgart, aus USNO-Kulmination gegen die Referenzmeridianzeit 12:00 minus 4 mal 9,18 min = 11:23:17 UTC).",
+      "source_url": "https://aa.usno.navy.mil/api/rstt/oneday?date=2026-02-11&coords=48.78,9.18&tz=1",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "2026-02-11: {\"phen\": \"Upper Transit\", \"time\": \"12:37\"} (tz 1.0)  ...  2026-11-03: {\"phen\": \"Upper Transit\", \"time\": \"12:07\"} (tz 1.0)",
+      "verdict": "ABGELEITET",
+      "note": "Rechenweg, kein woertlicher Quelltext: EoT = 11:23:17 minus Kulmination_in_UTC. Genauigkeit begrenzt durch die Minutenaufloesung der USNO-API: +/-30 s, plus Rundung. Extremwerte plausibel (Februar-Maximum der Zeitgleichung rund -14 min, Anfang November rund +16,4 min). WICHTIG: die Zeitgleichung ist NICHT die Sommerzeit — sie bewegt den Sonnenhöhepunkt um hoechstens rund 16 Minuten, die Sommerzeit verschiebt die Uhr um 60 Minuten. Nie verrechnen."
+    },
+    {
+      "claim_id": "A15",
+      "claim": "KONVENTIONSFALLE: Das NOAA-Tool SolarCalc erwartet Laengengrad WEST-POSITIV. Mit 'lon=+9.18' fuer Stuttgart liefert es systematisch verschobene Werte; korrekt ist lon=-9.18.",
+      "source_url": "https://gml.noaa.gov/grad/antuv/SolarCalc.jsp",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "<dd>-180.0 to +180.0, Negative for East, Pos for West.</dd>",
+      "verdict": "VERIFIZIERT",
+      "note": "In dieser Recherche zuerst mit +9.18 abgefragt: die Tagesmaximalhoehe blieb korrekt (unabhaengig vom Laengengrad), aber die Kulmination lag bei ca. 12:28 UTC statt 11:16 UTC. Mit -9.18 stimmten Hoehe (41,31 Grad), Azimut (180 Grad bei Kulmination) und die Zeitgleichung (+7 min) mit USNO und sunrise-sunset.org ueberein. Genau deshalb ist die Abweichung von 2,6 Grad beim Maximalwert NICHT mit einem Deklinationsfehler zu erklaeren — sie war reine Zeitzonen-Verschiebung. Prueffall fuer jede eigene Engine."
+    },
+    {
+      "claim_id": "A16",
+      "claim": "Genauigkeitsgrundlage und Brechungsannahmen des Referenzverfahrens: NOAA rechnet nach Meeus, setzt 0,833 Grad Brechung fuer Auf-/Untergang an und nennt +/-72 Grad als Genauigkeitsgrenze.",
+      "source_url": "https://gml.noaa.gov/grad/solcalc/calcdetails.html",
+      "source_kind": "unabhaengige_messung",
+      "source_date": "2026-09-28",
+      "quote": "The calculations in the NOAA Sunrise/Sunset and Solar Position Calculators are based on equations from Astronomical Algorithms, by Jean Meeus. The sunrise and sunset results are theoretically accurate to within a minute for locations between +/- 72 degrees latitude, and within 10 minutes outside of those latitudes. ... For sunrise and sunset calculations, we assume 0.833 degrees of atmospheric refraction. ... The NOAA/GML Solar Calculator is no longer actively supported or maintained by our team.",
+      "verdict": "VERIFIZIERT",
+      "note": "Seite vollstaendig gelesen. Zwei Konsequenzen: (1) NOAA ist selbst als 'nicht mehr aktiv gepflegt' gekennzeichnet — die Werte sind Stand der Quelle, nicht Stand heute; (2) die Genauigkeitszusage gilt fuer AUF-/UNTERGANG, nicht fuer beliebige Stundenwerte. Fuer willkuerliche Zeitpunkte sind die oben genannten Toleranzen (Hoehe +/-0,2 bis +/-0,5 Grad) meine Herleitung, kein Herstellerzitat — entsprechend als ABGELEIT zu behandeln. Ferner: NOAA weist darauf hin, dass es fuer Prozessfaelle keine zertifizierten Daten liefert und auf USNO verweist."
+    }
+  ]
+}
