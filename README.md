@@ -35,6 +35,8 @@ Official pricing references:
 - https://platform.minimax.io/subscribe/token-plan
 - https://platform.minimax.io/docs/guides/pricing-paygo
 
+For a more detailed buyer-oriented breakdown, see **[Detailed Token Plan vs. PAYG decision guide](PLAN_VS_API.md)**.
+
 For this benchmark, the useful question is not just price per token: it is **cost per correctly accepted task after retries, verifier work and repairs**. This run shows that M3.1 can do substantial work, but still benefits from an independent reviewer.
 
 
@@ -146,6 +148,7 @@ That is a statement about the public reports found as of **2026-09-28**, not a c
 
 ## Repository guide
 
+- PLAN_VS_API.md — buyer-oriented Token Plan vs. PAYG decision guide
 - TEST_METHODOLOGY.md — test design and evidence rules
 - RESULTS.md — result matrix
 - ERRATA_AND_EXTERNAL_REVIEW.md — bugs, bad oracles and corrections
