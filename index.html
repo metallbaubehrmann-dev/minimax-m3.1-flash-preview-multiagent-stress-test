@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schattenwerkstatt — Sonnenuhr-Baukasten</title>
+<!--
+  Schattenwerkstatt — EINZELDATEI (zusammengefuehrt aus src/ui/** und src/engine/**)
+
+  Diese Datei ist das fertige Ergebnis der Zusammenfuehrung:
+    - Rahmen und Inline-SVG-Symbole aus dem UI-Rahmen (unveraendert uebernommen),
+    - Layout aus styles.css            -> jetzt ein <style>-Block,
+    - Rechenkern aus shadow.mjs, solar.mjs, index.mjs -> jetzt ein klassischer
+      <script>-Block (siehe Kommentar am Anfang dieses Blocks),
+    - die vier UI-Skripte               -> jetzt je ein klassischer <script>-Block.
+
+  datei://-HINWEIS (verbindlich, siehe src/ui/README.md):
+  Alle Skripte sind KLASSISCHE Skripte ohne ES-Modul-Syntax. Chromium blockiert
+  die Modulsyntax unter file:// per CORS (Herkunft "null"); der Doppelklick
+  wuerde eine leere Seite zeigen. Klassische <script src="..."> funktionieren
+  unter file://. Es gibt kein fetch() und keine XHR. Der Rechenkern musste
+  deshalb vom ES-Modul auf ein klassisches Script umgestellt werden.
+
+  KEINE externen Ressourcen: kein CDN, keine Webfonts, keine url(http),
+  keine Netzaufrufe, keine API-Schluessel. Alle Symbole sind Inline-SVG.
+-->
+<style>
+/* =====================================================================
+ * Schattenwerkstatt — Oberflaeche (Besitz A1)
+ * KEINE externen Ressourcen: keine CDN, keine Webfonts, keine url(http).
+ * Nur Systemschriften des Browsers. Umlaute sind echte Zeichen.
+ * ===================================================================== */
+
+:root {
+  --bg: #12161d;
+  --bg-2: #1a212b;
+  --bg-3: #232c39;
+  --linie: #35414f;
+  --text: #e8edf4;
+  --text-schwach: #9fadbf;
+  --akzent: #f0b429;
+  --akzent-2: #57b6ff;
+  --gut: #4ec98a;
+  --warn: #ff8a5b;
+  --nacht: #6c7ea8;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Tahoma, "Noto Sans", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Sichtbare Fokusringe — Pflicht, nicht Deko. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--akzent-2);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.kopf {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--linie);
+  background: var(--bg-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  align-items: baseline;
+}
+.kopf h1 { font-size: 1.25rem; margin: 0; letter-spacing: .3px; }
+.kopf .zusatz { color: var(--text-schwach); font-size: .85rem; }
+
+.lage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+@media (max-width: 900px) {
+  .lage { grid-template-columns: minmax(0, 1fr); }
+}
+
+.karte {
+  background: var(--bg-2);
+  border: 1px solid var(--linie);
+  border-radius: var(--radius);
+  padding: 14px;
+  min-width: 0;
+}
+.karte > h2 {
+  font-size: 1rem;
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--linie);
+  text-transform: none;
+  letter-spacing: .2px;
+}
+.karte > h3 { font-size: .9rem; margin: 14px 0 6px; color: var(--akzent); }
+
+.feld { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 10px; }
+.feld label { display: flex; flex-direction: column; gap: 3px; font-size: .78rem; color: var(--text-schwach); }
+.feld input, .feld select, .feld button {
+  font: inherit;
+  font-size: .9rem;
+  background: var(--bg-3);
+  color: var(--text);
+  border: 1px solid var(--linie);
+  border-radius: 6px;
+  padding: 6px 8px;
+  min-height: 38px;
+}
+.feld input[type="number"] { width: 7.5em; }
+.feld input[type="date"], .feld input[type="time"] { width: 10.5em; }
+.feld input[type="range"] { padding: 0; min-height: 34px; }
+
+button {
+  font: inherit;
+  cursor: pointer;
+  background: var(--bg-3);
+  color: var(--text);
+  border: 1px solid var(--linie);
+  border-radius: 6px;
+  padding: 7px 12px;
+  min-height: 38px;
+}
+button:hover:not(:disabled) { background: #2c3849; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.haupt { background: var(--akzent); color: #1a1405; border-color: var(--akzent); font-weight: 600; }
+button.haupt:hover:not(:disabled) { background: #ffc84d; }
+button.an [aria-pressed="true"] { background: var(--akzent-2); color: #04121e; border-color: var(--akzent-2); font-weight: 600; }
+
+.schalterreihe { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- Szenenraster ---------- */
+#szene-wrap {
+  position: relative;
+  background: #0d1116;
+  border: 1px solid var(--linie);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+#szene { display: block; width: 100%; height: auto; touch-action: none; cursor: grab; }
+#szene.zieht { cursor: grabbing; }
+
+.szene-text { font-size: 11px; fill: var(--text-schwach); }
+.marke-linie { stroke: #4a5a6e; stroke-width: 1.2; }
+.marke-nord { stroke: var(--akzent); stroke-width: 2.4; }
+.marke-sued { stroke: #c76a4a; stroke-width: 2.4; }
+.marke-text { font-size: 13px; fill: var(--text); font-weight: 600; }
+.marke-ziffer { font-size: 11px; fill: var(--text-schwach); }
+
+.schatten { fill: #000; opacity: .55; }
+.schatten-grenze { fill: none; stroke: var(--warn); stroke-width: 2.5; stroke-dasharray: 7 5; }
+.schatten-spitze { fill: var(--warn); }
+.stab { fill: var(--akzent); stroke: #7a5c07; stroke-width: 1; }
+.stab-sockel { fill: #7a5c07; }
+.griff { fill: none; stroke: var(--akzent-2); stroke-width: 1.4; stroke-dasharray: 4 4; }
+.greifflaeche { fill: transparent; cursor: move; }
+
+.bahn { stroke: #2a3442; stroke-width: 1; }
+.himmelskoerper { stroke: none; }
+
+.nacht-text { font-size: 15px; fill: var(--nacht); font-weight: 600; }
+
+/* ---------- Messtafel ---------- */
+.tafel { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.tafel th, .tafel td { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--linie); vertical-align: top; }
+.tafel th { color: var(--text-schwach); font-weight: 500; width: 12.5em; }
+.tafel td.zahl { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.zeile-getrennt {
+  border-left: 3px solid var(--akzent-2);
+  padding: 6px 0 6px 9px;
+  margin: 6px 0;
+}
+.zeile-getrennt .label { font-size: .78rem; color: var(--akzent-2); }
+.zeile-getrennt .wert { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.zeile-getrennt .erklaerung { font-size: .8rem; color: var(--text-schwach); }
+
+.chip {
+  display: inline-block;
+  font-size: .75rem;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--linie);
+  background: var(--bg-3);
+  white-space: nowrap;
+}
+.chip.instabil { background: #4a3410; border-color: var(--warn); color: var(--warn); }
+.chip.ok { background: #10331f; border-color: var(--gut); color: var(--gut); }
+.chip.nacht { background: #1b2438; border-color: var(--nacht); color: var(--nacht); }
+.chip.warn { background: #40230f; border-color: var(--warn); color: var(--warn); }
+
+.hinweis {
+  border-left: 3px solid var(--warn);
+  background: #241a12;
+  padding: 8px 10px;
+  border-radius: 0 6px 6px 0;
+  font-size: .88rem;
+  margin: 8px 0;
+}
+.hinweis.nacht { border-left-color: var(--nacht); background: #171e2e; }
+.hinweis.gut { border-left-color: var(--gut); background: #12251b; }
+.hinweis .kein { color: var(--text); font-weight: 600; }
+
+/* ---------- Aufgaben ---------- */
+.aufgaben-wahl { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.aufgaben-wahl button { text-align: left; max-width: 15em; }
+.aufgaben-wahl .nr { display: block; font-size: .72rem; color: var(--text-schwach); }
+.aufgaben-wahl button[aria-pressed="true"] .nr { color: #04121e; }
+
+.ergebnis { margin-top: 8px; font-size: .92rem; }
+.stand-zeilen { font-size: .82rem; color: var(--text-schwach); }
+.stand-zeilen div { margin: 2px 0; }
+
+/* ---------- Zeit ---------- */
+#zeitskala { width: 100%; }
+.sim-zeile {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+.sim-zeile .gross { font-size: 1.05rem; }
+
+/* ---------- Details / Hilfe ---------- */
+details {
+  border: 1px solid var(--linie);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 8px 0;
+  background: var(--bg-2);
+}
+details > summary { cursor: pointer; font-weight: 600; min-height: 28px; }
+details[open] > summary { margin-bottom: 6px; }
+details p, details li { font-size: .87rem; color: var(--text-schwach); }
+details ul { margin: 4px 0; padding-left: 20px; }
+details strong, details b { color: var(--text); }
+kbd {
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: .8rem;
+  background: var(--bg-3);
+  border: 1px solid var(--linie);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 5px;
+  color: var(--text);
+  white-space: nowrap;
+}
+.kb-tabelle { width: 100%; border-collapse: collapse; font-size: .86rem; }
+.kb-tabelle th, .kb-tabelle td { text-align: left; padding: 3px 6px; border-bottom: 1px solid var(--linie); vertical-align: top; }
+.kb-tabelle th { color: var(--text-schwach); font-weight: 500; width: 11em; }
+
+.fuss {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px 28px;
+  color: var(--text-schwach);
+  font-size: .8rem;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+@media (max-width: 620px) {
+  html, body { font-size: 15px; }
+  .lage { padding: 10px; gap: 10px; }
+  .karte { padding: 11px; }
+  .kopf { padding: 10px 12px; }
+  .feld { gap: 8px; }
+  .feld input[type="number"] { width: 6.2em; }
+  .feld input[type="date"], .feld input[type="time"] { width: 9em; }
+  .tafel th { width: 9.5em; }
+  /* Zeit-Zerlegungskette darf umbrechen, sonst erzwingt nowrap einen
+     horizontalen Seitenueberlauf im schmalen Layout (Browserabnahme 2026-09-28). */
+  .tafel th, .tafel td { width: auto; }
+  .tafel td.zahl { white-space: normal; overflow-wrap: anywhere; }
+  .kb-tabelle th { width: 8.5em; }
+  .feld label { font-size: .74rem; }
+  button, .feld input, .feld select { min-height: 42px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Inline-SVG-Symbole (keine externen Dateien) ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <symbol id="sym-sonne" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="5" fill="#f0b429"/>
+    <g stroke="#f0b429" stroke-width="2" stroke-linecap="round">
+      <line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/>
+      <line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/>
+      <line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.8" y2="19.8"/>
+      <line x1="4.2" y1="19.8" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.8" y2="4.2"/>
+    </g>
+  </symbol>
+  <symbol id="sym-mond" viewBox="0 0 24 24">
+    <path d="M19 14.5A8 8 0 0 1 9.5 5a8 8 0 1 0 9.5 9.5z" fill="#8fa3c8"/>
+  </symbol>
+  <symbol id="sym-tastatur" viewBox="0 0 24 24">
+    <rect x="1.5" y="5" width="21" height="14" rx="2" fill="none" stroke="#9fadbf" stroke-width="1.7"/>
+    <g fill="#9fadbf">
+      <rect x="4" y="8" width="2.4" height="2.4"/><rect x="7.6" y="8" width="2.4" height="2.4"/>
+      <rect x="11.2" y="8" width="2.4" height="2.4"/><rect x="14.8" y="8" width="2.4" height="2.4"/>
+      <rect x="18.4" y="8" width="2.4" height="2.4"/><rect x="4" y="11.6" width="2.4" height="2.4"/>
+      <rect x="7.6" y="11.6" width="2.4" height="2.4"/><rect x="11.2" y="11.6" width="2.4" height="2.4"/>
+      <rect x="14.8" y="11.6" width="2.4" height="2.4"/><rect x="18.4" y="11.6" width="2.4" height="2.4"/>
+      <rect x="6" y="15.2" width="12" height="2.2"/>
+    </g>
+  </symbol>
+  <symbol id="sym-warnung" viewBox="0 0 24 24">
+    <path d="M12 2 23 21H1z" fill="none" stroke="#ff8a5b" stroke-width="1.8" stroke-linejoin="round"/>
+    <line x1="12" y1="9" x2="12" y2="14.5" stroke="#ff8a5b" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="12" cy="17.4" r="1.15" fill="#ff8a5b"/>
+  </symbol>
+  <symbol id="sym-haken" viewBox="0 0 24 24">
+    <path d="M4 12.5 9.5 18 20 6.5" fill="none" stroke="#4ec98a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</defs></svg>
+
+<header class="kopf">
+  <h1>Schattenwerkstatt</h1>
+  <span class="zusatz">Baue mit Sonnenstand und Schatten. Alles rechnet aus dem Sonnenstand, nicht aus einer Skizze.</span>
+  <span class="zusatz" id="engine-status">Engine-Status wird geprüft …</span>
+</header>
+
+<main class="lage">
+
+  <!-- ================= SZENE ================= -->
+  <section class="karte" aria-labelledby="h-szene">
+    <h2 id="h-szene">Werkstattbank</h2>
+
+    <div id="szene-wrap">
+      <svg id="szene" viewBox="-120 -120 240 240" role="img"
+           aria-labelledby="h-szene" aria-describedby="szene-beschreibung">
+        <desc id="szene-beschreibung">Blick von oben auf eine runde Stundenmarke. Die 12-Uhr-Marke zeigt nach Norden, die 6-Uhr-Marke nach Süden, die 3-Uhr-Marke nach Osten, die 9-Uhr-Marke nach Westen. Der Stab ist verschiebbar, sein Schatten zeigt von der Sonne weg.</desc>
+        <g id="szene-marken"></g>
+        <g id="szene-limite"></g>
+        <g id="szene-schatten"></g>
+        <g id="szene-stab"></g>
+        <g id="szene-himmel"></g>
+        <g id="szene-griff"></g>
+        <g id="szene-text"></g>
+      </svg>
+    </div>
+
+    <div class="feld" style="margin-top:10px">
+      <label for="stab-hoehe">Stabhöhe (cm)
+        <input type="range" id="stab-hoehe" min="20" max="220" step="1" value="90"
+               aria-describedby="stab-hoehe-wert">
+      </label>
+      <span class="chip" id="stab-hoehe-wert">90 cm</span>
+    </div>
+
+    <p class="szene-text" id="schatten-info" style="margin:6px 0 0;color:var(--text-schwach)"></p>
+    <div id="nacht-hinweis" class="hinweis nacht" hidden>
+      <span class="kein">Nacht.</span> Die Sonne steht unter dem Horizont. Ein Schatten existiert
+      nicht — es wird deshalb keiner gezeichnet, auch kein leerer.
+    </div>
+    <div id="limit-hinweis" class="hinweis" hidden>
+      <svg width="16" height="16" aria-hidden="true"><use href="#sym-warnung"></use></svg>
+      <span id="limit-text"></span>
+    </div>
+  </section>
+
+  <div style="display:flex; flex-direction:column; gap:16px; min-width:0;">
+
+    <!-- ---- Ort ---- -->
+    <section class="karte" aria-labelledby="h-ort">
+      <h2 id="h-ort">Ort</h2>
+      <div class="feld">
+        <label for="ort-breite">Breite (° N, 5 bis 85)
+          <input type="number" id="ort-breite" min="5" max="85" step="0.01" value="48.78"
+                 inputmode="decimal" aria-describedby="ort-hinweis">
+        </label>
+        <label for="ort-laenge">Länge (° O, −180 bis 180)
+          <input type="number" id="ort-laenge" min="-180" max="180" step="0.01" value="9.18"
+                 inputmode="decimal">
+        </label>
+        <label for="ort-tz">Zeitzone
+          <select id="ort-tz">
+            <option value="Europe/Berlin" selected>Europe/Berlin</option>
+            <option value="UTC">UTC</option>
+            <option value="Europe/Lisbon">Europe/Lisbon</option>
+            <option value="Europe/Moscow">Europe/Moscow</option>
+            <option value="America/New_York">America/New_York</option>
+            <option value="America/Los_Angeles">America/Los_Angeles</option>
+            <option value="Asia/Tokyo">Asia/Tokyo</option>
+            <option value="Australia/Sydney">Australia/Sydney</option>
+          </select>
+        </label>
+        <button type="button" id="ort-uebernehmen">Ort übernehmen</button>
+        <button type="button" id="ort-demo">Demo-Ort (48,78 N / 9,18 E)</button>
+      </div>
+      <p class="szene-text" id="ort-hinweis" style="color:var(--text-schwach);font-size:.8rem;margin:0">
+        Der Demo-Ort liegt bei 48,78 Grad N / 9,18 Grad E in der Zeitzone Europe/Berlin.
+        Die Breite ist bewusst von 5 bis 85 Grad N frei wählbar, damit der Jahres- und
+        Tageslauf der Sonne überprüfbar wird. Achtung: Stuttgart (9,18 Grad O) liegt nicht
+        auf dem Hauptmeridian der Zone (15 Grad O) — dieser Längenfehler taucht unten
+        bei der wahren Sonnenzeit wieder auf.
+      </p>
+    </section>
+
+    <!-- ---- Zeit ---- -->
+    <section class="karte" aria-labelledby="h-zeit">
+      <h2 id="h-zeit">Zeit</h2>
+
+      <div class="schalterreihe" role="group" aria-label="Zeitmodus">
+        <button type="button" class="an" id="modus-live" aria-pressed="true">Live (echte Uhr)</button>
+        <button type="button" class="an" id="modus-sim" aria-pressed="false">Simulation</button>
+      </div>
+
+      <div id="sim-bereich" hidden style="margin-top:10px">
+        <div class="feld">
+          <label for="sim-datum">Simulationsdatum
+            <input type="date" id="sim-datum" aria-describedby="sim-utc-anzeige">
+          </label>
+          <label for="sim-zeit">Simulationszeit (Ortszeit)
+            <input type="time" id="sim-zeit" step="60">
+          </label>
+          <label for="sim-geschwindigkeit">Geschwindigkeit
+            <select id="sim-geschwindigkeit">
+              <option value="60">1 Minute / Sekunde</option>
+              <option value="300">5 Minuten / Sekunde</option>
+              <option value="900" selected>15 Minuten / Sekunde</option>
+              <option value="3600">1 Stunde / Sekunde</option>
+              <option value="10800">3 Stunden / Sekunde</option>
+            </select>
+          </label>
+          <button type="button" id="sim-play" class="haupt">Start</button>
+        </div>
+
+        <label class="sr-only" for="zeitskala">Zeitregler über den ganzen Tag, Minuten nach Mitternacht Ortszeit</label>
+        <input type="range" id="zeitskala" min="0" max="1439" step="1" value="720"
+               aria-describedby="sim-utc-anzeige">
+        <div class="sim-zeile">
+          <span class="gross" id="sim-ortszeit">–</span>
+          <span class="chip" id="sim-utc-anzeige">Simulationszeit (UTC): –</span>
+        </div>
+        <p class="szene-text" style="color:var(--text-schwach);font-size:.8rem;margin:4px 0 0">
+          Die Simulationszeit ist eine sichtbare, von dir gesetzte Größe. Sie wird nirgends
+          intern erzeugt — auch nicht beim Start. Sie steht oben als Datum, Uhrzeit und
+          UTC-Wert und lässt sich auf drei Wegen ändern: Datum, Uhrzeit, Zeitregler.
+        </p>
+      </div>
+    </section>
+
+    <!-- ---- Messwerte ---- -->
+    <section class="karte" aria-labelledby="h-mess">
+      <h2 id="h-mess">Messwerte</h2>
+      <table class="tafel">
+        <caption class="sr-only">Sonnenstand, Tagesdaten und die drei getrennten Zeitangaben</caption>
+        <tbody>
+          <tr><th scope="row">Sonnenhöhe</th><td class="zahl" id="m-hoehe">–</td></tr>
+          <tr><th scope="row">Sonnenazimut</th><td class="zahl" id="m-azimut">–</td></tr>
+          <tr><th scope="row">Datum</th><td class="zahl" id="m-datum">–</td></tr>
+          <tr><th scope="row">Tageslänge</th><td class="zahl" id="m-tageslaenge">–</td></tr>
+          <tr><th scope="row">Sonnenaufgang</th><td class="zahl" id="m-aufgang">–</td></tr>
+          <tr><th scope="row">Sonnenuntergang</th><td class="zahl" id="m-untergang">–</td></tr>
+          <tr><th scope="row">Sonnenhöchststand</th><td class="zahl" id="m-hoechststand">–</td></tr>
+          <tr><th scope="row">Sonnendeklination</th><td class="zahl" id="m-deklination">–</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ---- Die drei Zeiten, getrennt ---- -->
+    <section class="karte" aria-labelledby="h-zeiten">
+      <h2 id="h-zeiten">Drei Zeiten — jede mit eigener Ursache</h2>
+
+      <div class="zeile-getrennt">
+        <div class="label">Ortszeit (Zonenzeit)</div>
+        <div class="wert" id="z-ortszeit">–</div>
+        <div class="erklaerung">Reine Uhrzeit der Zeitzone. Verschiebt sich, wenn die
+          Zeitzone wechselt oder — einmal im Jahr — die <b>Sommerzeit</b> beginnt.</div>
+      </div>
+
+      <div class="zeile-getrennt">
+        <div class="label">UTC (koordinierte Weltzeit)</div>
+        <div class="wert" id="z-utc">–</div>
+        <div class="erklaerung">Dieselbe Uhrzeit ohne Zone, mit festem Versatz. Die
+          <b>Sommerzeit</b> ändert ausschließlich den Zonenversatz, nicht die Sonne.</div>
+      </div>
+
+      <div class="zeile-getrennt">
+        <div class="label">Wahre Sonnenzeit</div>
+        <div class="wert" id="z-wahre">–</div>
+        <div class="erklaerung">Das, was die Sonnenuhr tatsächlich anzeigt. Hier wirkt die
+          <b>Zeitgleichung</b> — eine astronomische Größe aus der Erdbahn und der
+          schiefen Erdachse. Sie wirkt an jedem Tag, auch ohne Sommerzeit.</div>
+      </div>
+
+      <table class="tafel" style="margin-top:8px">
+        <caption class="sr-only">Zerlegung von der Ortszeit bis zur wahren Sonnenzeit; jede Zeile ist die Summe der vorigen</caption>
+        <tbody>
+          <tr><th scope="row">Ortszeit (Zonenzeit)</th><td class="zahl" id="z-schritt0">–</td></tr>
+          <tr><th scope="row">± Zonenversatz</th><td class="zahl" id="z-schritt1">–</td></tr>
+          <tr><th scope="row">= mittlere Zeit am Zonenmeridian</th><td class="zahl" id="z-schritt2">–</td></tr>
+          <tr><th scope="row">± Längenfehler</th><td class="zahl" id="z-schritt3">–</td></tr>
+          <tr><th scope="row">= mittlere Ortszeit</th><td class="zahl" id="z-schritt4">–</td></tr>
+          <tr><th scope="row">± Zeitgleichung</th><td class="zahl" id="z-schritt5">–</td></tr>
+          <tr><th scope="row">= wahre Sonnenzeit</th><td class="zahl" id="z-schritt6">–</td></tr>
+        </tbody>
+      </table>
+      <p class="szene-text" id="z-pruefzeile" style="font-size:.78rem;color:var(--text-schwach)"></p>
+
+      <details>
+        <summary>Warum sind das drei verschiedene Ursachen? (Sommerzeit ist nicht die Zeitgleichung)</summary>
+        <p><b>1. Zonenzeit und Sommerzeit — ein Uhr-Thema.</b> Die Zonenzeit richtet sich
+        danach, welche Uhren in einem politischen Gebiet gleich laufen müssen. Damit das
+        aufgeht, teilt man die Erde in 15-Grad-Streifen; jeder Streifen bekommt eine
+        Bezugszeit. Ein Ort liegt dabei fast nie genau auf seinem Streifen — Stuttgart
+        (9,18 Grad O) liegt 5,82 Grad westlich der Bezugslinie der Zone
+        Europe/Berlin (15 Grad O). Das ergibt gut 23 Minuten.</p>
+        <p>Die <b>Sommerzeit</b> schiebt die Uhren eine Stunde vor, damit im Sommer mehr
+        Tageslicht in den Feierabend fällt. Sie verschiebt damit genau eine Größe: den
+        Zonenversatz zwischen Ortszeit und UTC. Sie hat mit der Sonne selbst nichts zu
+        tun — der Sonnenstand zu einem gegebenen UTC-Zeitpunkt bleibt derselbe.</p>
+        <p><b>2. Die Zeitgleichung — ein Astronomie-Thema.</b> Die Erde läuft auf einer
+        Ellipse, nicht auf einem Kreis, und ihre Achse steht schief. Dadurch verschiebt
+        sich der Mittelpunkt der Sonne über den Tag hinweg ein Stück vor und zurück
+        gegenüber der Uhr. Diese Verschiebung heißt <b>Zeitgleichung</b>, sie liegt
+        zwischen etwa −14 und +16 Minuten und ist zweimal im Jahr null. Sie hängt
+        ausschließlich vom Kalenderdatum ab — nicht davon, ob gerade eine Stunde
+        „umgestellt" wurde.</p>
+        <p><b>3. Der Längenfehler — wieder ein Uhr-Thema.</b> Er entsteht allein daraus,
+        dass die Zeitzone ein Breitenzstreifen-Modell ist, und verschwindet, sobald man
+        auf wahre Sonnenzeit umschaltet.</p>
+        <p><b>Kurzform:</b> Sommerzeit verschiebt die Uhr am Stück (Regelwerk),
+        die Zeitgleichung verschiebt die Sonne fein (Astronomie), der Längenfehler
+        verschiebt die Uhr relativ zum eigenen Meridian (Regelwerk). Nur die
+        Zeitgleichung ist ein Naturvorgang.</p>
+      </details>
+    </section>
+
+    <!-- ---- Aufgaben ---- -->
+    <section class="karte" aria-labelledby="h-aufgaben">
+      <h2 id="h-aufgaben">Aufgaben</h2>
+      <div class="aufgaben-wahl" role="group" aria-label="Aufgabe wählen">
+        <button type="button" id="task-btn-1" data-task="aufgabe-1" aria-pressed="true">
+          <span class="nr">Aufgabe 1</span>12-Uhr-Marke
+        </button>
+        <button type="button" id="task-btn-2" data-task="aufgabe-2" aria-pressed="false">
+          <span class="nr">Aufgabe 2</span>Längster Schatten
+        </button>
+        <button type="button" id="task-btn-3" data-task="aufgabe-3" aria-pressed="false">
+          <span class="nr">Aufgabe 3</span>6-Uhr-Marke
+        </button>
+      </div>
+
+      <h3 id="task-titel">–</h3>
+      <p id="task-auftrag" style="font-size:.92rem;margin:4px 0">–</p>
+      <details id="task-hinweis-box">
+        <summary>Anleitung</summary>
+        <p id="task-hinweis">–</p>
+        <p style="margin-bottom:0"><b>Erfolgsbedingung (aus der Rechnung):</b><br>
+          <span id="task-bedingung">–</span></p>
+      </details>
+
+      <div class="feld" style="margin-top:10px">
+        <button type="button" class="haupt" id="task-pruefen">Prüfen (H)</button>
+        <button type="button" id="task-zuruecksetzen">Diese Aufgabe zurücksetzen</button>
+      </div>
+
+      <div class="ergebnis" id="task-ergebnis" role="status" aria-live="polite">–</div>
+      <div class="stand-zeilen" id="task-stand"></div>
+    </section>
+
+    <!-- ---- Speicher, Reset, Hilfe ---- -->
+    <section class="karte" aria-labelledby="h-verwaltung">
+      <h2 id="h-verwaltung">Verwaltung</h2>
+
+      <div class="schalterreihe">
+        <button type="button" id="reset-alles" class="haupt">Alles zurücksetzen</button>
+        <button type="button" id="reset-einstellungen">Nur Einstellungen löschen</button>
+        <button type="button" id="speicher-test">Speicher prüfen</button>
+      </div>
+
+      <div class="feld" style="margin-top:10px">
+        <label style="flex-direction:row;align-items:center;gap:8px">
+          <input type="checkbox" id="speicher-blockieren" style="min-height:auto;width:18px;height:18px">
+          Speicherzugriff simuliert blockiert
+        </label>
+      </div>
+      <p class="hinweis" id="speicher-status" style="margin:4px 0 0">–</p>
+
+      <details id="kbd-box">
+        <summary><svg width="14" height="14" aria-hidden="true"><use href="#sym-tastatur"></use></svg> Tastaturkurzbefehle</summary>
+        <table class="kb-tabelle">
+          <caption class="sr-only">Tastaturkurzbefehle der Schattenwerkstatt</caption>
+          <tbody>
+            <tr><th scope="row"><kbd>Leertaste</kbd></th><td>Simulation starten / anhalten</td></tr>
+            <tr><th scope="row"><kbd>L</kbd></th><td>Zwischen Live-Modus und Simulation wechseln</td></tr>
+            <tr><th scope="row"><kbd>[</kbd> <kbd>]</kbd></th><td>Zeit um 1 Minute zurück / vor (mit <kbd>Umschalt</kbd>: 1 Stunde)</td></tr>
+            <tr><th scope="row"><kbd>Pfeil links</kbd> <kbd>Pfeil rechts</kbd></th><td>Zeit um 10 Minuten zurück / vor</td></tr>
+            <tr><th scope="row"><kbd>Pfeil hoch</kbd> <kbd>Pfeil runter</kbd></th><td>Stab um 5 cm nach Norden / Süden</td></tr>
+            <tr><th scope="row"><kbd>A</kbd> <kbd>D</kbd></th><td>Stab nach Westen / Osten</td></tr>
+            <tr><th scope="row"><kbd>+</kbd> <kbd>−</kbd></th><td>Stab höher / niedriger</td></tr>
+            <tr><th scope="row"><kbd>H</kbd></th><td>Aufgabe prüfen</td></tr>
+            <tr><th scope="row"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></th><td>Aufgabe 1 / 2 / 3 wählen</td></tr>
+            <tr><th scope="row"><kbd>R</kbd></th><td>Alles zurücksetzen</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-bottom:0">Alle Schaltflächen, Eingabefelder und den Zeitregler
+        erreichst du zusätzlich mit <kbd>Tab</kbd> und <kbd>Umschalt</kbd>+<kbd>Tab</kbd>.
+        Jedes bediente Element zeigt beim Fokus einen hellen Ring.</p>
+      </details>
+
+      <details>
+        <summary>Was setzt „Alles zurücksetzen" genau zurück?</summary>
+        <p>Der große Knopf setzt den <b>Spielzustand</b> auf den Anfangswert zurück:</p>
+        <ul>
+          <li><b>Ort:</b> 48,78 Grad N / 9,18 Grad O, Zeitzone Europe/Berlin (Demo-Ort).</li>
+          <li><b>Zeit:</b> der gerade laufende echte Zeitpunkt, danach die Simulation mit
+              dem Datum des heutigen Tages, der Uhrzeit 12:00 Ortszeit,
+              Geschwindigkeit 15 Minuten pro Sekunde, Status <b>angehalten</b>.</li>
+          <li><b>Aufgabe:</b> Aufgabe 1, alle drei Aufgaben wieder offen, kein Erfolg vermerkt.</li>
+          <li><b>Aufbau:</b> Stab in der Mitte der Marke (0 / 0) mit 90 cm Höhe.</li>
+        </ul>
+        <p>Der Knopf <b>„Nur Einstellungen löschen"</b> fasst den Spielzustand nicht an.
+        Er entfernt ausschließlich die gespeicherten <b>Einstellungen</b>
+        (Ortswahl, zuletzt gewählte Aufgabe, Layoutschalter) aus dem localStorage.
+        Auch diese beiden Zustände sind getrennt, damit ein Fehler im Speicher den
+        Spielbetrieb nicht zerstören kann.</p>
+      </details>
+
+      <details>
+        <summary>Wie wird geprüft, dass die App auch ohne localStorage läuft?</summary>
+        <p>Kästchen <b>„Speicherzugriff simuliert blockiert"</b> setzt den Speicher intern
+        auf einen Zustand, in dem <b>jeder</b> Zugriff absichtlich eine Ausnahme wirft —
+        genau wie in einem Browser, der den Speicher verweigert. Danach funktionieren
+        Ort, Zeit, Schatten und Aufgaben weiter; nur die Einstellungen gelten dann nur
+        für diese Sitzung. <b>„Speicher prüfen"</b> schreibt einen Wert, liest ihn zurück
+        und schreibt das Ergebnis samt Ausnahme in die Zeile über dem Knopf.
+        Das ist der dokumentierte Testpunkt — kein bloßes Versprechen. Zwei weitere
+        Wege führen zum selben Nachweis: ein Browser, der localStorage tatsächlich
+        verweigert (z. B. blockierte Third-Party-Speicher), oder ein Verzeichnis ohne
+        Schreibrecht beim Profilzugriff.</p>
+      </details>
+    </section>
+
+  </div>
+</main>
+
+<footer class="fuss">
+  <p>Schattenwerkstatt · Alle Werte stammen aus der Sonnenrechnung, nicht aus einer Skizze.
+  Koordinaten: x nach Osten, y nach Norden, z nach oben. Azimut 0° = Norden, 90° = Osten.
+  1 Szeneneinheit = 1 cm.</p>
+  <p id="fuss-engine"></p>
+</footer>
+
+<!-- ===== Rechenkern: vormals ES-Module, jetzt ein klassischer Script-Block ===== -->
+<script>
+/* ------------------------------------------------------------------
+ * Schattenwerkstatt — Rechenkern in EINER Datei (ehemalige ES-Module).
+ *
+ * Herkunft: shadow.mjs, solar.mjs und index.mjs aus src/engine/.
+ * Umwandlung ES-Modul -> klassisches Script, rein strukturell:
+ *   1. Die Import-Zeile aus solar.mjs entfaellt. Die drei daraus
+ *      benoetigten Funktionen werden unten aus dem Shadow-Objekt gelesen.
+ *   2. Jede Export-Markierung vor einer Deklaration entfaellt. Innerhalb seiner
+ *      IIFE ist die Deklaration ohnehin nur dort sichtbar.
+ *   3. Beide Module bekommen je eine eigene IIFE. Ohne diese Huelle
+ *      laege alles im selben globalen Scope eines klassischen Scripts
+ *      und `ZENITH_UNSTABLE_DEG` — in beiden Dateien als const deklariert
+ *      — waere ein SyntaxError. Reihenfolge: shadow.mjs zuerst, weil
+ *      solar.mjs es benutzt.
+ *   4. 'use strict' entspricht der Modul-Semantik (ES-Module sind immer
+ *      strikt) und war vorher implizit wirksam.
+ *   5. Am Ende entsteht genau die Form, die der Engine-Adapter sucht:
+ *      window.SW_ENGINE = { solar: {...}, shadow: {...} }.
+ *
+ * Rechenlogik, Bezeichner, Zahlenwerte und erlaeuternde Kommentare sind
+ * unveraendert. Kein fetch, kein XHR, keine Netzressource.
+ * ------------------------------------------------------------------ */
+
+var SW_SHADOW = (function () {
+  'use strict';
+
+/**
+ * shadow.mjs — Ebenenschatten-Projektion fuer die Sonnenuhr (reine Funktion).
+ *
+ * MODULTYP: ES-Modul (ESM, Dateiendung .mjs).
+ *
+ * KOORDINATEN: x = Ost, y = Nord, z = oben.
+ *
+ * projectShadow({px,py,pz, sx,sy,sz}) -> {x,y} | undefined
+ *   Der Aufrufpunkt P = (px,py,pz) ist die Objectspitze, der Fuss steht bei
+ *   (px,py,0). s = (sx,sy,sz) ist ein beliebiger (nicht normalisierter)
+ *   Richtungsvektor VON DER ERDE ZUR SONNE. Der Schattenstrahl laeuft mit -s:
+ *       P + t*(-s)  mit  pz - t*sz = 0   ->   t = pz/sz
+ *       x = px - t*sx,  y = py - t*sy
+ *   t haengt nur von sz ab, deshalb muss s nicht normiert sein.
+ *   sz <= 0 (Sonne unter dem Horizont oder exakt am Horizont) -> undefined,
+ *   weil es dann keinen Ebenenschatten auf z=0 gibt.
+ *
+ * sunVectorFromState(altitudeDeg, azimuthDeg) -> {sx,sy,sz} (Einheitsvektor)
+ *   sx = cos(h)*sin(A), sy = cos(h)*cos(A), sz = sin(h)   [A ab Nord im UZS]
+ *   Bei |h| < 2 Grad ist A physikalisch instabil -> unstable: true.
+ *
+ * Deterministisch: keine Uhr, kein Zufall, keine NaN-Ausgaben.
+ */
+
+const ZENITH_UNSTABLE_DEG = 2;
+
+function sunVectorFromState(altitudeDeg, azimuthDeg) {
+  const h = (altitudeDeg * Math.PI) / 180;
+  const a = (azimuthDeg * Math.PI) / 180;
+  return {
+    sx: Math.cos(h) * Math.sin(a),
+    sy: Math.cos(h) * Math.cos(a),
+    sz: Math.sin(h),
+  };
+}
+
+function projectShadow({ px = 0, py = 0, pz = 0, sx, sy, sz } = {}) {
+  const vals = [px, py, pz, sx, sy, sz];
+  for (let i = 0; i < vals.length; i += 1) {
+    if (!Number.isFinite(vals[i])) return undefined; // kein NaN nach aussen
+  }
+  if (!(sz > 0)) return undefined; // Sonne am oder unter dem Horizont
+  const t = pz / sz;
+  return { x: px - t * sx, y: py - t * sy };
+}
+
+function shadowLengthFromAltitude(objectHeight, altitudeDeg) {
+  const a = (altitudeDeg * Math.PI) / 180;
+  if (!(altitudeDeg > 0)) return undefined;
+  return objectHeight / Math.tan(a);
+}
+
+  return {
+    ZENITH_UNSTABLE_DEG: ZENITH_UNSTABLE_DEG,
+    sunVectorFromState: sunVectorFromState,
+    projectShadow: projectShadow,
+    shadowLengthFromAltitude: shadowLengthFromAltitude
+  };
+})();
+
+var SW_SOLAR = (function () {
+  'use strict';
+
+  // Ersatz der Import-Zeile aus solar.mjs — dieselben drei Funktionen,
+  // jetzt aus dem bereits geladenen Shadow-Objekt.
+  var projectShadow = SW_SHADOW.projectShadow;
+  var sunVectorFromState = SW_SHADOW.sunVectorFromState;
+  var shadowLengthFromAltitude = SW_SHADOW.shadowLengthFromAltitude;
+
+/**
+ * solar.mjs — Astronomische Rechen-Engine der Sonnenuhr (reine, deterministische Funktionen).
+ *
+ * MODULTYP: ES-Modul (ESM, Dateiendung .mjs). Hier als KLASSISCHES Script
+ *   eingebettet, weil Chromium unter file:// keine ES-Module laedt
+ *   (Herkunft "null"). Im Node-Prozess bleibt das Modul unveraendert
+ *   unter './src/engine/solar.mjs' nutzbar.
+ *
+ * OEFFENTLICHE API
+ *   computeState({utcMs, latDeg, lonDeg, tzId, horizonDeg}) -> State
+ *   projectAt(state, {x,y,z}) -> {x,y,length,...} | undefined
+ *   solarGeometry(utcMs), hourAngleDeg(trueSolarTimeMin), altitudeDegAt(...)
+ *   SUNRISE_HORIZON_GEOMETRIC = 0, SUNRISE_HORIZON_REFRACTED = -0.833
+ *
+ * KOORDINATEN UND KONVENTIONEN
+ *   x = Ost, y = Nord, z = oben.  Azimut: 0° = Nord, 90° = Ost, im Uhrzeigersinn.
+ *
+ * UMRECHNUNG ZUR NOAA-REFERENZ (Fallstrick 1, ausdruecklich dokumentiert)
+ *   Die NOAA-Rechnung zaehlt Laengengrade WEST-POSITIV:
+ *       lonWest(NOAA) = -lonEast(Engine)
+ *   und definiert die wahre Sonnenzeit als
+ *       TST(NOAA) = LST + EqT + 4*lonWest - 60*tz
+ *   Wir rechnen durchgaengig in UTC-Minuten und damit OST-POSITIV:
+ *       wahre Sonnenzeit = UTC + 4*lonEast + EqT
+ *   Ortszeit (Zonenzeit) = UTC + 60*tz, Zone laengt lonZone = 15*tz Grad:
+ *       wahre Sonnenzeit = Ortszeit + 4*(lonEast - lonZone) + EqT   (identisch, Vorgabe 5)
+ *   Der Stundenwinkel H = wahreSonnenzeit/4 - 180 ist damit vorzeichenrichtig
+ *   direkt verwendbar; am Vormittag (H < 0) steht die Sonne im Osten.
+ *
+ * AZIMUT-RECHNUNG (Konvention: ab Nord, im Uhrzeigersinn)
+ *   cosA = (sin(dec) - sin(h)*sin(lat)) / (cos(h)*cos(lat));  A = acos(cosA)
+ *   H > 0 (Nachmittag)  -> A = 360 - A,  damit Ost (90) und West (270) korrekt liegen.
+ *   Nordhalbkugel: Sonne geht im Osten auf (A nahe 90, im Sommer knapp < 90) und
+ *   im Westen unter (A nahe 270).  Bei Zenitdurchgang (Zendistanz < 2°) ist A
+ *   instabil -> azimuthUnstable: true, damit die UI keine Unsinnswerte zeigt.
+ *
+ * ANNAHMEN (bewusst getroffen, nicht geraten)
+ *   A1) Standardhorizont ist 0.0° (Sonnenmitte, geometrisch), weil die geforderten
+ *       Referenzwerte (48.78 N: 21.06. ~15h55m) dazu passen und weil Taglaenge
+ *       (21.06.) + Taglaenge (21.12.) dann exakt 24h ergibt. Fuer die zivile
+ *       Definition horizonDeg: SUNRISE_HORIZON_REFRACTED (-0.833) verwenden,
+ *       dann ca. 16h10m / 8h15m.  Beide Varianten sind derselbe Code-Pfad.
+ *   A2) Sonnenhoehe wird als MITTENPUNKT der Sonne gerechnet, ohne Parallaxe und
+ *       ohne Aberration. Fuer eine Sonnenuhr mit mm-Genauigkeit ist das die
+ *       uebliche Naeherung.
+ *   A3) Der Sonnentag wird numerisch ueber die Stundenhöhe bestimmt (Scan ueber
+ *       den vollen Sonnentag in 1-min-Schritten + Bisektion auf ~1e-7 min), NICHT
+ *       ueber eine geschlossene H0-Formel. Dadurch wird Polarnacht sauber als
+ *       "kein Aufgang" (null) erkannt und Polartag als 1440 min.
+ *   A4) Zenitdistanz < 2° gilt als instabil (Vorgabe 2).
+ *
+ * DETERMINISMUS
+ *   - Kein new Date() ohne Argument, kein Date.now(), kein Math.random().
+ *     Die Zeit kommt zu 100% aus utcMs. new Date(utcMs) ist erlaubt (Argument!).
+ *   - Astronomische Felder (altitudeDeg, azimuthDeg, declinationDeg,
+ *     equationOfTimeMin, trueSolarTimeMin, hourAngleDeg, dayLengthMin, isDay)
+ *     sind zeitzonen- UND dst-frei. Nur localCivil* / sunriseLocal /
+ *     sunsetLocal / solarNoonLocal haengen an tzId (und damit an der tzdata
+ *     der Laufzeit) — das ist dokumentiert, nicht versteckt.
+ */
+
+const SUNRISE_HORIZON_GEOMETRIC = 0;
+const SUNRISE_HORIZON_REFRACTED = -0.833;
+const ZENITH_UNSTABLE_DEG = 2;
+
+const RAD = Math.PI / 180;
+const DEG = 180 / Math.PI;
+const MIN_MS = 60000;
+const DAY_MS = 86400000;
+
+const mod360 = (x) => ((x % 360) + 360) % 360;
+const mod1440 = (x) => ((x % 1440) + 1440) % 1440;
+const clamp = (x, lo, hi) => (x < lo ? lo : x > hi ? hi : x);
+const sinD = (d) => Math.sin(d * RAD);
+const cosD = (d) => Math.cos(d * RAD);
+const asinD = (x) => Math.asin(clamp(x, -1, 1)) * DEG;
+const acosD = (x) => Math.acos(clamp(x, -1, 1)) * DEG;
+const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
+
+/* ------------------------------------------------------------------ Zeitzone */
+
+const fmtCache = new Map();
+
+function formatterFor(tzId) {
+  if (typeof tzId !== 'string' || tzId.length === 0) {
+    throw new TypeError('computeState: tzId muss ein nicht leerer String sein (IANA, z.B. "Europe/Berlin").');
+  }
+  let f = fmtCache.get(tzId);
+  if (!f) {
+    try {
+      f = new Intl.DateTimeFormat('en-US', {
+        timeZone: tzId,
+        hourCycle: 'h23',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+      });
+    } catch (err) {
+      throw new RangeError(`computeState: unbekannte Zeitzone "${tzId}" (${err && err.message}).`);
+    }
+    fmtCache.set(tzId, f);
+  }
+  return f;
+}
+
+function civilParts(utcMsValue, tzId) {
+  const parts = formatterFor(tzId).formatToParts(new Date(utcMsValue));
+  const p = { year: 1970, month: 1, day: 1, hour: 0, minute: 0, second: 0 };
+  for (const part of parts) {
+    if (part.type in p) p[part.type] = Number(part.value);
+  }
+  const asUtc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
+  p.utcOffsetMin = Math.round((asUtc - Math.floor(utcMsValue / 1000) * 1000) / MIN_MS);
+  p.dayIndex = Math.floor(Date.UTC(p.year, p.month - 1, p.day) / DAY_MS);
+  p.hhmm = `${String(p.hour).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`;
+  p.iso = `${p.year}-${String(p.month).padStart(2, '0')}-${String(p.day).padStart(2, '0')} ${p.hhmm}:${String(p.second).padStart(2, '0')}`;
+  return p;
+}
+
+/* --------------------------------------------------------------- Astronomie */
+
+function julianDay(utcMsValue) {
+  return utcMsValue / DAY_MS + 2440587.5;
+}
+
+/**
+ * Sonnenbahngroessen nach NOAA/Meeus (Bahnrichtungsabweichung + Schiefe der
+ * Erdbahn). Reine Funktion von utcMs.
+ */
+function solarGeometry(utcMsValue) {
+  const T = (julianDay(utcMsValue) - 2451545.0) / 36525; // Julianische Jahrhunderte seit J2000
+  const L0 = mod360(280.46646 + T * (36000.76983 + T * 0.0003032)); // mittlere Länge
+  const M = mod360(357.52911 + T * (35999.05029 - 0.0001537 * T)); // mittlere Anomalie
+  const e = 0.016708634 - T * (0.000042037 + 0.0000001267 * T); // Exzentrizitaet
+  const C = // Gleichung des Mittelpunkts
+    sinD(M) * (1.914602 - T * (0.004817 + 0.000014 * T)) +
+    sinD(2 * M) * (0.019993 - 0.000101 * T) +
+    sinD(3 * M) * 0.000289;
+  const trueLong = L0 + C;
+  const omega = 125.04 - 1934.136 * T; // Nutation in Laenge (naeherungsweise)
+  const lambda = trueLong - 0.00569 - 0.00478 * sinD(omega); // scheinbare Laenge
+  const eps0 = 23 + (26 + (21.448 - T * (46.815 + T * (0.00059 - T * 0.001813))) / 60) / 60;
+  const eps = eps0 + 0.00256 * cosD(omega); // korrigierte Schiefe
+  const declinationDeg = asinD(sinD(eps) * sinD(lambda));
+  const rightAscensionDeg = mod360(
+    Math.atan2(cosD(eps) * sinD(lambda), cosD(lambda)) * DEG,
+  );
+  const y = Math.tan((eps * RAD) / 2) ** 2;
+  // Zeitgleichung = wahre Sonnenzeit minus mittlere Sonnenzeit, in Minuten.
+  const equationOfTimeMin =
+    4 * DEG *
+    (y * sinD(2 * L0) -
+      2 * e * sinD(M) +
+      4 * e * y * sinD(M) * cosD(2 * L0) -
+      0.5 * y * y * sinD(4 * L0) -
+      1.25 * e * e * sinD(2 * M));
+  return { julianDay: julianDay(utcMsValue), T, L0, M, e, lambda, eps, declinationDeg, rightAscensionDeg, equationOfTimeMin };
+}
+
+/** Stundenwinkel in Grad, -180..180. H = wahre Sonnenzeit/4 - 180. */
+function hourAngleDeg(trueSolarTimeMin) {
+  return trueSolarTimeMin / 4 - 180;
+}
+
+function altitudeFrom(latDeg, declDeg, hAngleDeg) {
+  return asinD(sinD(latDeg) * sinD(declDeg) + cosD(latDeg) * cosD(declDeg) * cosD(hAngleDeg));
+}
+
+function trueSolarTimeFrom(utcMsValue, lonDeg, eqTimeMin) {
+  return mod1440(mod1440(utcMsValue / MIN_MS) + 4 * lonDeg + eqTimeMin);
+}
+
+function altitudeDegAt(utcMsValue, latDeg, lonDeg) {
+  const g = solarGeometry(utcMsValue);
+  return altitudeFrom(latDeg, g.declinationDeg, hourAngleDeg(trueSolarTimeFrom(utcMsValue, lonDeg, g.equationOfTimeMin)));
+}
+
+/**
+ * Horizontale Sonnenkoordinaten fuer Breite, Deklination, Stundenwinkel.
+ * Liefert nie NaN: im Polfall wird azimuthDeg als 0/180 gesetzt und
+ * azimuthUnstable gesetzt, weil der Azimut dort nicht definiert ist.
+ */
+function horizontalFrom(latDeg, declDeg, hAngleDeg) {
+  const altitudeDeg = altitudeFrom(latDeg, declDeg, hAngleDeg);
+  const denom = cosD(altitudeDeg) * cosD(latDeg);
+  let azimuthDeg;
+  let azimuthUnstable = false;
+  if (Math.abs(denom) < 1e-9) {
+    azimuthDeg = declDeg >= 0 ? 0 : 180; // Zenitdurchgang oder Pol — beliebig, markiert
+    azimuthUnstable = true;
+  } else {
+    const cosA = clamp((sinD(declDeg) - sinD(altitudeDeg) * sinD(latDeg)) / denom, -1, 1);
+    azimuthDeg = acosD(cosA); // ab Nord
+    if (sinD(hAngleDeg) > 0) azimuthDeg = 360 - azimuthDeg; // Nachmittag -> Westseite
+  }
+  const zenithDeg = 90 - altitudeDeg;
+  if (zenithDeg < ZENITH_UNSTABLE_DEG) azimuthUnstable = true;
+  return { altitudeDeg, azimuthDeg, zenithDeg, azimuthUnstable };
+}
+
+/* ------------------------------------------------- Sonnentag / Aufgang /untergang */
+
+function refineMaximum(fn, center, halfWidthMin, iterations = 80) {
+  let lo = center - halfWidthMin;
+  let hi = center + halfWidthMin;
+  for (let i = 0; i < iterations; i += 1) {
+    const m1 = lo + (hi - lo) / 3;
+    const m2 = hi - (hi - lo) / 3;
+    if (fn(m1) < fn(m2)) lo = m1;
+    else hi = m2;
+  }
+  return (lo + hi) / 2;
+}
+
+function bisectRoot(fn, a, b, iterations = 32) {
+  const fa = fn(a);
+  for (let i = 0; i < iterations; i += 1) {
+    const m = (a + b) / 2;
+    const fm = fn(m);
+    if ((fa <= 0) === (fm <= 0)) a = m;
+    else b = m;
+  }
+  return (a + b) / 2;
+}
+
+/**
+ * Sonnenhöchststand, Aufgang, Untergang und Tageslaenge fuer den Sonnentag,
+ * der den Zeitpunkt utcMsValue enthaelt. Aufgang/Untergang = null bei Polar-
+ * nacht/Polartag (kein Fehler, sondern fachlich korrekt).
+ */
+function solarDayEvents(utcMsValue, latDeg, lonDeg, horizonDeg = SUNRISE_HORIZON_GEOMETRIC) {
+  const utcMin = mod1440(utcMsValue / MIN_MS);
+  const localMeanMin = mod1440(utcMin + 4 * lonDeg);
+  const dayStartMs = Math.floor((utcMsValue - localMeanMin * MIN_MS) / MIN_MS) * MIN_MS;
+  let noonMs = dayStartMs + 720 * MIN_MS;
+  for (let i = 0; i < 2; i += 1) {
+    noonMs = dayStartMs + (720 - solarGeometry(noonMs).equationOfTimeMin) * MIN_MS;
+  }
+  const alt = (ms) => altitudeDegAt(ms, latDeg, lonDeg);
