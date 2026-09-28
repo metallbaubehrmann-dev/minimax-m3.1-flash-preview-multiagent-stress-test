@@ -1,0 +1,17 @@
+{
+  "test_date": "2026-09-28",
+  "parent_session": "mvs_e63fc83e274d465a9a196a9dc55ac865",
+  "initial_children": [
+    {"role":"A1 UI/rendering reviewer","session_id":"mvs_135ed4a396af40358581d8e16d19c83f","agent_name":"coder","model":"MiniMax-M3.1-Flash-Preview","provider":"minimax","api":"anthropic-messages","created_local":"2026-09-28T17:38:43+02:00"},
+    {"role":"A2 test-oracle auditor","session_id":"mvs_8491cae0b9144469bf79b66e4dcae1a5","agent_name":"mavis","model":"MiniMax-M3.1-Flash-Preview","provider":"minimax","api":"anthropic-messages","created_local":"2026-09-28T17:38:44+02:00"},
+    {"role":"A3 astronomy verifier","session_id":"mvs_301a98e3dd5244e290ff46fc6cebd611","agent_name":"mavis","model":"MiniMax-M3.1-Flash-Preview","provider":"minimax","api":"anthropic-messages","created_local":"2026-09-28T17:38:46+02:00"},
+    {"role":"A4 initial Obsidian/memory audit","session_id":"mvs_9846228bde6f4d9ab5717a926b9ec7b8","agent_name":"explore","model":"MiniMax-M3.1-Flash-Preview","provider":"minimax","api":"anthropic-messages","created_local":"2026-09-28T17:39:54+02:00","note":"initial role was read-only and later replaced"},
+    {"role":"A5 initial n8n/fileops audit","session_id":"mvs_e62d67aabac6426e9320b652a630a9f6","agent_name":"explore","model":"MiniMax-M3.1-Flash-Preview","provider":"minimax","api":"anthropic-messages","created_local":"2026-09-28T17:39:55+02:00","note":"initial role was read-only and later replaced"},
+    {"role":"A6 research/source review","session_id":"mvs_dd5ae1acbc6047c3806df76831e49b30","agent_name":"mavis","model":"MiniMax-M3.1-Flash-Preview","provider":"minimax","api":"anthropic-messages","created_local":"2026-09-28T17:39:57+02:00"}
+  ],
+  "recovery_children": [
+    {"role":"A4b Obsidian/memory worker","session_id":"mvs_66ceebad545d47ada7f8d8503cfd86cb","agent_name":"general","model":"MiniMax-M3.1-Flash-Preview","provider":"minimax","api":"anthropic-messages","created_local":"2026-09-28T17:43:54+02:00"},
+    {"role":"A5b n8n/fileops worker","session_id":"mvs_6e457027400848329100ab8f01963b13","agent_name":"general","model":"MiniMax-M3.1-Flash-Preview","provider":"minimax","api":"anthropic-messages","created_local":"2026-09-28T17:43:56+02:00"}
+  ],
+  "parallelism_evidence": "MiniMax runtime logs show overlapping branch-session setup, tool and LLM events for the initial child sessions."
+}
