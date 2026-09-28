@@ -1,0 +1,55 @@
+
+--- ./test_equator_equinox.mjs ---
+  OK    ├äquator/├äquinoktium: Meridianschnitt H=0 am 20.03.2026 zwischen 11:50 und 12:25 UTC
+  OK    ├äquator/├äquinoktium: Zenitdistanz < 0.5 Grad und Deklination ~0
+  OK    Zeitgleichung: Zonenzeit vs. wahre Sonnenzeit sind strikt getrennt (Identit├ñt)
+  OK    Zeitgleichung: Deklination wechselt am 20.03.2026 das Vorzeichen
+  OK    Zenitdurchgang: 48.78 N erreicht am 21.06. nur ~64.7 Grad, nie 90
+  OK    Zenitdurchgang: 45 N erreicht am 21.06. nur ~68.4 Grad
+  OK    Zenitdurchgang: am ├äquator max. H├Âhe an der Tagundnachtgleiche ~90 Grad
+  OK    H├Âchststand ist ein Maximum: H├Âhe vor/nach Meridian kleiner, H wechselt das Vorzeichen
+
+--- ./test_daylength.mjs ---
+  OK    Tagl├ñnge 48.78 N am 21.06. Ôëê 15h56m (955 min gefordert, Toleranz 950..966)
+  OK    Tagl├ñnge 48.78 N am 21.12. Ôëê 8h03m (500 min gefordert, Toleranz 475..500)
+  OK    Konsistenz: Tagl├ñnge 21.06. + 21.12. = 24h (┬▒5 min)
+  OK    Tagl├ñnge am ├äquator = 12h (720 min ┬▒3), an JEDEM Tag des Jahres
+  OK    Tagl├ñnge 5 N am 21.06. Ôëê 12h17m (Sonne steht n├Ârdlich ÔåÆ Tag < 12h)
+  OK    Polartag 85 N am 21.06.: 1440 min, kein Aufgang, kein Untergang
+  OK    Sonnenmittag liegt nahe dem Zonenmittag (┬▒40 min) und H├Âhe ist maximal
+  OK    Aufgang vor dem Mittag, Untergang danach (UTC-Marken konsistent)
+
+--- ./test_polar.mjs ---
+  OK    Polarnacht 78 N am 21.12.: isDay=false, kein Aufgang, negativer H├Âchststand
+  OK    Polarnacht 68 N am 21.12. (jenseits des Polarkreises)
+  OK    Genau am Polarkreis 66.5 N am 21.12.: Sonne streift den Horizont, Tag > 0
+  OK    Polartag 70 N am 21.06.: 1440 min, H├Âhe +43.4 Grad
+  OK    Breitenbereich 5..85 N bleibt ├╝ber das ganze Jahr stabil und endlich
+
+--- ./test_shadow.mjs ---
+  OK    Schatten: H├Âhe 45┬░ ÔçÆ L├ñnge = Objekth├Âhe, horizontal nach Westen
+  OK    Schatten: Objektposition verschiebt den Schatten 1:1 (px, py)
+  OK    Schatten: Sonne im Osten (21.06., 08:00 UTC Stuttgart) ÔçÆ x negativ
+  OK    Schatten: Sonne im Westen (21.06., 15:00 UTC Stuttgart) ÔçÆ x positiv
+  OK    Schatten: Richtung exakt antiparallel zur horizontalen Sonnenrichtung
+  OK    Schatten: undefined bei sz <= 0 (Sonne am oder unter dem Horizont)
+  OK    Nacht: isDay=false, H├Âhe negativ, kein Schatten, keine NaN
+  OK    Zenitdurchgang: azimuthUnstable=true, aber Azimut bleibt endlich (0..360)
+
+--- ./test_time_and_boundaries.mjs ---
+  OK    Zeitgleichung: Extremwerte Februar (Minimum) und November (Maximum)
+  OK    Zeitgleichung: ganzj├ñhrig |EqT| Ôëñ 17 min
+  OK    Zeitgleichung: Vorzeichen und Gr├Â├ƒenordnung passen zur Kurvenform (4 Kontrolltage)
+  OK    Zwei Orte, gleiche Zeit, verschiedene L├ñnge ÔçÆ wahre Sonnenzeit um 4┬À╬ölon verschieden
+  OK    Jahresgrenze 2025/2026: Tagesl├ñnge, H├Âchststand und EqT ├ñndern sich stetig
+  OK    Monatsgrenze 31.01./01.02.: Tagesl├ñnge und Deklination stetig
+  OK    Monatswechsel 30.04./01.05. 2026: gleiche Stetigkeit
+  OK    Schalttag 29.02.2028 wird korrekt als Kalendertag gef├╝hrt
+  OK    UTC-Tageswechsel: localCivil wechselt exakt um Mitternacht
+  OK    Zeitzone und Sommerzeit sickern nicht in die Astronomie ein
+  OK    Determinismus: identische Eingabe ÔçÆ identische Ausgabe, keine Uhr benutzt
+  OK    Eingabevalidierung: untaugliche Argumente werden abgewiesen (kein NaN)
+
+=========================================
+bestanden: 41   fehlgeschlagen: 0   ├╝bersprungen: 0
+=========================================
