@@ -1,0 +1,96 @@
+Schattenwerkstatt ÔÇö UI-Vertragstest
+UI-Verzeichnis: C:\Users\Alexa\Desktop\MiniMax_M31_GitHub_Release_20260928\src\ui
+
+1) Dateien
+  OK   vorhanden: src/ui/engine-adapter.js
+  OK   vorhanden: src/ui/storage.js
+  OK   vorhanden: src/ui/tasks.js
+  OK   vorhanden: src/ui/app.js
+  OK   vorhanden: src/ui/styles.css
+  OK   vorhanden: src/ui/shadow-workshop.html
+
+2) Engine-Vertrag: Name und Parameterform
+  OK   solar.computeState({ utcMs, latDeg, lonDeg, tzId }) aufgerufen  (Muster: solar.computeState({ utcMs: ÔÇª, latDeg: ÔÇª, lonDeg: ÔÇª, tzId: ÔÇª }))
+  OK   shadow.projectShadow({ px, py, pz, sx, sy, sz }) aufgerufen  (Muster: shadow.projectShadow({ px: ÔÇª, py: ÔÇª, pz: ÔÇª, sx: ÔÇª, sy: ÔÇª, sz: ÔÇª }))
+  OK   solar.projectAt(state, { x, y, z }) aufgerufen  (Muster: solar.projectAt(state, { x: ÔÇª, y: ÔÇª, z: ÔÇª }))
+  OK   Oberflaeche fragt den Sonnenstand ueber den Adapter ab
+  OK   Oberflaeche projiziert ueber projectAt mit (Zustand, Punkt)
+  OK   Schattenpolygon benutzt dieselbe SVG-Y-Abbildung wie die Spitzenmarke  (Regression fuer den extern gefundenen Y-Doppelinvertierungsfehler)
+  OK   TODO-ENGINE ist im Adapter sichtbar markiert  (Ersatzrechnung ist als Entwicklungsstand gekennzeichnet, nicht getarnt)
+  OK   Adapter nennt die erwartete globale Engine-Anmeldung  (SW_ENGINE zuerst, danach weitere Fenster-Namen)
+  OK   Adapter faellt dokumentiert zurueck, wenn keine Engine da ist
+
+3) Keine externen Ressourcen
+  OK   kein <script> mit http(s)- oder protokollrelativer Quelle  (0 Treffer)
+  OK   kein <link> auf eine externe Ressource  (0 Treffer)
+  OK   keine http(s)-Quelle ausser dem SVG-Namensraum  (erlaubt: http://www.w3.org/2000/svg ┬À gefunden: http://www.w3.org/2000/svg)
+  OK   keine CDN-Hostnamen
+  OK   kein @import und keine url(...) in CSS
+  OK   kein fetch, kein XMLHttpRequest, kein WebSocket  (Netzaufrufe wuerden unter file:// ohnehin scheitern)
+  OK   keine Webfont-Angabe
+
+4) datei://-Tauglichkeit
+  OK   keine ES-Modul-Syntax in src/ui (bricht unter file:// per CORS)
+  OK   alle vier Skripte sind klassisch eingebunden  (Reihenfolge: adapter -> storage -> tasks -> app)
+  OK   die datei://-Begruendung steht im Quelltext  (erklaert in Code-Kommentar und HTML-Kopf)
+  OK   Umlaute sind echte Zeichen, nicht ae/oe/ue-Ersatz
+
+5) Die drei Aufgaben: definierte Erfolgsbedingungen
+  OK   Aufgabenmodul laedt und liefert genau drei Aufgaben  (3 Aufgaben)
+  OK   Aufgabe "aufgabe-1" ist vollstaendig definiert  (Nr 1, Toleranz 5)
+  OK   Aufgabe "aufgabe-2" ist vollstaendig definiert  (Nr 2, Toleranz 120000)
+  OK   Aufgabe "aufgabe-3" ist vollstaendig definiert  (Nr 3, Toleranz 5)
+  OK   die drei geforderten Aufgabentexte sind vorhanden  (1) Schatten auf die 12-Uhr-Marke | 2) Der l├ñngste Schatten des Tages | 3) Schatten bis zur 6-Uhr-Marke)
+  OK   Marken liegen auf 12 = Norden, 3 = Osten, 6 = Sueden, 9 = Westen  (x = Ost, y = Nord)
+  OK   Aufgabe 1: Treffer loest aus, 40 cm daneben nicht  (Treffer: "Geschafft: Die Schattenspitze liegt 0,0 ÔÇª")
+  OK   Aufgabe 1: Toleranzgrenze liegt bei 5 cm
+  OK   Aufgabe 2: exakter Tiefpunkt loest aus, 10 Minuten daneben nicht  (2-Minuten-Fenster, Abstand im Trefferfall: 0,0 min)
+  OK   Aufgabe 3: 1 cm neben der 6-Marke loest aus, 80 cm daneben nicht
+  OK   Aufgabe 3: nennt den Grund, wenn die 6-Marke breitenbedingt unerreichbar ist
+  OK   nachts ist KEINE Aufgabe loesbar, auch nicht mit perfektem Abstand  (Pflicht: bei Sonne unter dem Horizont kein Erfolg)
+  OK   Aufgabe 2 verweigert den Erfolg ohne Tagesrechnung
+  OK   alle drei Aufgaben melden ihre Bedingung im Klartext
+
+6) Kein Erfolg ohne Nutzeraktion
+  OK   bewertet() verlangt fuer einen Erfolg ein wahres Nutzerereignis
+  OK   die laufende Uhr ruft aktualisiere ohne Nutzeraktion  (beide Timer (Simulation und Live) uebergeben false)
+  OK   es gibt einen Bedienweg, der mit aktualisiere(true) wertet  (17 Aufrufstellen)
+  OK   es gibt keinen Knopf, der Erfolg ohne Rechnung setzt
+
+7) localStorage: Ausnahme darf die App nicht zerbrechen
+  OK   localStorage-Zugriffe sind strukturell von try/catch umgeben  (7 try / 7 catch ÔÇö nur Struktur, siehe Verhaltenstest unten)
+  OK   die Schnittstelle merke() gibt bei Fehler false statt zu werfen
+  OK   probe() wirft selbst nie, sondern meldet die Ausnahme  (der Testpunkt-Zustand bleibt sichtbar)
+  OK   Lage 1 ÔÇö localStorage fehlt: hole() liefert Standard, merke() false, probe() meldet  (Ausnahme: localStorage ist nicht vorhanden)
+  OK   Lage 1 ÔÇö der Zustand wird als blockiert gemeldet  (blockiert)
+  OK   Lage 2 ÔÇö localStorage wirft: nichts bricht, probe() nennt die Ausnahme  (Ausnahme: SecurityError: Zugriff verweigert)
+  OK   Lage 3 ÔÇö Testpunkt aktiv: hole() liefert Standard, probe() meldet, wirft nicht  (Ausnahme: Testpunkt: Speicherzugriff absichtlich blockiert)
+  OK   Lage 4 ÔÇö Normalfall: schreiben und zuruecklesen gelingt
+  OK   dokumentierter Testpunkt im HTML vorhanden  (Schalter, Pruefknopf, Ausgabe)
+  OK   der Testpunkt erzeugt den Fehler wirklich, statt ihn zu behaupten
+  OK   der Testpunkt ist auch im UI erklaert
+
+8) Anforderungen an die Anzeige
+  OK   Ortszeit, UTC und wahre Sonnenzeit sind getrennt beschriftet
+  OK   Sommerzeit und Zeitgleichung werden als zwei Ursachen getrennt
+  OK   alle geforderten Messwerte haben ein Feld  (Hoehe, Azimut, Datum, Tageslaenge, Aufgang, Untergang, Hoechststand)
+  OK   Nachtzustand hat einen ausdruecklichen Hinweis
+  OK   Schattenbegrenzung ist sichtbar gekennzeichnet  (Grenze 250 cm = 2,5 x 100 cm Werkstattflaeche, plus Text in der Oberflaeche)
+  OK   der Azimut wird bei Instabilitaet gekennzeichnet, nicht als Sprungzahl gezeigt
+  OK   bei Nacht wird kein Schatten-Element erzeugt  (die Gruppe szene-schatten wird nur im Tag-Zweig befuellt)
+  OK   der Nachtzustand meldet sich ausdruecklich
+  OK   die Aufgaben messen gegen die wahre Spitze, nicht die abgeschnittene  (sonst wuerde ein begrenzter Schatten einen Treffer vortaeuschen)
+  OK   Reset setzt Ort, Zeit, Aufgabe und Aufbau zurueck
+  OK   die Reset-Definition steht im UI
+  OK   Simulationszeit ist sichtbar gesetzt und nicht intern erzeugt
+  OK   Maus, Touch und Tastatur bedienen die Stabsposition
+  OK   Tastenkuerzel sind im UI erklaert  (21 Tasten dokumentiert)
+  OK   Fokusringe sind sichtbar definiert
+  OK   Bedienelemente sind per Tab erreichbar und benannt
+  OK   schmales Mobil-Layout ist vorgesehen  (900px einspaltig, 620px Mobil)
+  OK   Sprache ist Deutsch
+  OK   Start laeuft in einer Fehlerhuellung
+
+=====================================================
+bestanden: 74   gescheitert: 0   Hinweise: 0
+ERGEBNIS: BESTANDEN (nur statischer Vertrag + Aufgabenlogik, kein Browser, keine Sonnenrechnung)
