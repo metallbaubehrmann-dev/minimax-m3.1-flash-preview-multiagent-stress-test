@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schattenwerkstatt — Sonnenuhr-Baukasten</title>
+<!--
+  Schattenwerkstatt — UI-Rahmen (Besitz A1: src/ui/**)
+
+  Datei://-HINWEIS (verbindlich, siehe src/ui/README.md):
+  Alle Skripte sind KLASSISCHE Skripte ohne ES-Modul-Syntax. Chromium blockiert
+  `import ... from '...'` unter file:// per CORS (Herkunft "null"); der
+  Doppelklick wuerde eine leere Seite zeigen. Klassische <script src="...">
+  funktionieren unter file://. Es gibt kein fetch() und keine XHR.
+  Der Hauptagent baut daraus die einzelne index.html, indem er diese Datei
+  und alle Skripte/Inline-Styles zusammenfuegt.
+
+  KEINE externen Ressourcen: kein CDN, keine Webfonts, keine url(http),
+  keine Netzaufrufe, kein API-Schluessel. Alle Symbole sind Inline-SVG.
+-->
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ===== Inline-SVG-Symbole (keine externen Dateien) ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <symbol id="sym-sonne" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="5" fill="#f0b429"/>
+    <g stroke="#f0b429" stroke-width="2" stroke-linecap="round">
+      <line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/>
+      <line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/>
+      <line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.8" y2="19.8"/>
+      <line x1="4.2" y1="19.8" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.8" y2="4.2"/>
+    </g>
+  </symbol>
+  <symbol id="sym-mond" viewBox="0 0 24 24">
+    <path d="M19 14.5A8 8 0 0 1 9.5 5a8 8 0 1 0 9.5 9.5z" fill="#8fa3c8"/>
+  </symbol>
+  <symbol id="sym-tastatur" viewBox="0 0 24 24">
+    <rect x="1.5" y="5" width="21" height="14" rx="2" fill="none" stroke="#9fadbf" stroke-width="1.7"/>
+    <g fill="#9fadbf">
+      <rect x="4" y="8" width="2.4" height="2.4"/><rect x="7.6" y="8" width="2.4" height="2.4"/>
+      <rect x="11.2" y="8" width="2.4" height="2.4"/><rect x="14.8" y="8" width="2.4" height="2.4"/>
+      <rect x="18.4" y="8" width="2.4" height="2.4"/><rect x="4" y="11.6" width="2.4" height="2.4"/>
+      <rect x="7.6" y="11.6" width="2.4" height="2.4"/><rect x="11.2" y="11.6" width="2.4" height="2.4"/>
+      <rect x="14.8" y="11.6" width="2.4" height="2.4"/><rect x="18.4" y="11.6" width="2.4" height="2.4"/>
+      <rect x="6" y="15.2" width="12" height="2.2"/>
+    </g>
+  </symbol>
+  <symbol id="sym-warnung" viewBox="0 0 24 24">
+    <path d="M12 2 23 21H1z" fill="none" stroke="#ff8a5b" stroke-width="1.8" stroke-linejoin="round"/>
+    <line x1="12" y1="9" x2="12" y2="14.5" stroke="#ff8a5b" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="12" cy="17.4" r="1.15" fill="#ff8a5b"/>
+  </symbol>
+  <symbol id="sym-haken" viewBox="0 0 24 24">
+    <path d="M4 12.5 9.5 18 20 6.5" fill="none" stroke="#4ec98a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</defs></svg>
+
+<header class="kopf">
+  <h1>Schattenwerkstatt</h1>
+  <span class="zusatz">Baue mit Sonnenstand und Schatten. Alles rechnet aus dem Sonnenstand, nicht aus einer Skizze.</span>
+  <span class="zusatz" id="engine-status">Engine-Status wird geprüft …</span>
+</header>
+
+<main class="lage">
+
+  <!-- ================= SZENE ================= -->
+  <section class="karte" aria-labelledby="h-szene">
+    <h2 id="h-szene">Werkstattbank</h2>
+
+    <div id="szene-wrap">
+      <svg id="szene" viewBox="-120 -120 240 240" role="img"
+           aria-labelledby="h-szene" aria-describedby="szene-beschreibung">
+        <desc id="szene-beschreibung">Blick von oben auf eine runde Stundenmarke. Die 12-Uhr-Marke zeigt nach Norden, die 6-Uhr-Marke nach Süden, die 3-Uhr-Marke nach Osten, die 9-Uhr-Marke nach Westen. Der Stab ist verschiebbar, sein Schatten zeigt von der Sonne weg.</desc>
+        <g id="szene-marken"></g>
+        <g id="szene-limite"></g>
+        <g id="szene-schatten"></g>
+        <g id="szene-stab"></g>
+        <g id="szene-himmel"></g>
+        <g id="szene-griff"></g>
+        <g id="szene-text"></g>
+      </svg>
+    </div>
+
+    <div class="feld" style="margin-top:10px">
+      <label for="stab-hoehe">Stabhöhe (cm)
+        <input type="range" id="stab-hoehe" min="20" max="220" step="1" value="90"
+               aria-describedby="stab-hoehe-wert">
+      </label>
+      <span class="chip" id="stab-hoehe-wert">90 cm</span>
+    </div>
+
+    <p class="szene-text" id="schatten-info" style="margin:6px 0 0;color:var(--text-schwach)"></p>
+    <div id="nacht-hinweis" class="hinweis nacht" hidden>
+      <span class="kein">Nacht.</span> Die Sonne steht unter dem Horizont. Ein Schatten existiert
+      nicht — es wird deshalb keiner gezeichnet, auch kein leerer.
+    </div>
+    <div id="limit-hinweis" class="hinweis" hidden>
+      <svg width="16" height="16" aria-hidden="true"><use href="#sym-warnung"></use></svg>
+      <span id="limit-text"></span>
+    </div>
+  </section>
+
+  <div style="display:flex; flex-direction:column; gap:16px; min-width:0;">
+
+    <!-- ---- Ort ---- -->
+    <section class="karte" aria-labelledby="h-ort">
+      <h2 id="h-ort">Ort</h2>
+      <div class="feld">
+        <label for="ort-breite">Breite (° N, 5 bis 85)
+          <input type="number" id="ort-breite" min="5" max="85" step="0.01" value="48.78"
+                 inputmode="decimal" aria-describedby="ort-hinweis">
+        </label>
+        <label for="ort-laenge">Länge (° O, −180 bis 180)
+          <input type="number" id="ort-laenge" min="-180" max="180" step="0.01" value="9.18"
+                 inputmode="decimal">
+        </label>
+        <label for="ort-tz">Zeitzone
+          <select id="ort-tz">
+            <option value="Europe/Berlin" selected>Europe/Berlin</option>
+            <option value="UTC">UTC</option>
+            <option value="Europe/Lisbon">Europe/Lisbon</option>
+            <option value="Europe/Moscow">Europe/Moscow</option>
+            <option value="America/New_York">America/New_York</option>
+            <option value="America/Los_Angeles">America/Los_Angeles</option>
+            <option value="Asia/Tokyo">Asia/Tokyo</option>
+            <option value="Australia/Sydney">Australia/Sydney</option>
+          </select>
+        </label>
+        <button type="button" id="ort-uebernehmen">Ort übernehmen</button>
+        <button type="button" id="ort-demo">Demo-Ort (48,78 N / 9,18 E)</button>
+      </div>
+      <p class="szene-text" id="ort-hinweis" style="color:var(--text-schwach);font-size:.8rem;margin:0">
+        Der Demo-Ort liegt bei 48,78 Grad N / 9,18 Grad E in der Zeitzone Europe/Berlin.
+        Die Breite ist bewusst von 5 bis 85 Grad N frei wählbar, damit der Jahres- und
+        Tageslauf der Sonne überprüfbar wird. Achtung: Stuttgart (9,18 Grad O) liegt nicht
+        auf dem Hauptmeridian der Zone (15 Grad O) — dieser Längenfehler taucht unten
+        bei der wahren Sonnenzeit wieder auf.
+      </p>
+    </section>
+
+    <!-- ---- Zeit ---- -->
+    <section class="karte" aria-labelledby="h-zeit">
+      <h2 id="h-zeit">Zeit</h2>
+
+      <div class="schalterreihe" role="group" aria-label="Zeitmodus">
+        <button type="button" class="an" id="modus-live" aria-pressed="true">Live (echte Uhr)</button>
+        <button type="button" class="an" id="modus-sim" aria-pressed="false">Simulation</button>
+      </div>
+
+      <div id="sim-bereich" hidden style="margin-top:10px">
+        <div class="feld">
+          <label for="sim-datum">Simulationsdatum
+            <input type="date" id="sim-datum" aria-describedby="sim-utc-anzeige">
+          </label>
+          <label for="sim-zeit">Simulationszeit (Ortszeit)
+            <input type="time" id="sim-zeit" step="60">
+          </label>
+          <label for="sim-geschwindigkeit">Geschwindigkeit
+            <select id="sim-geschwindigkeit">
+              <option value="60">1 Minute / Sekunde</option>
+              <option value="300">5 Minuten / Sekunde</option>
+              <option value="900" selected>15 Minuten / Sekunde</option>
+              <option value="3600">1 Stunde / Sekunde</option>
+              <option value="10800">3 Stunden / Sekunde</option>
+            </select>
+          </label>
+          <button type="button" id="sim-play" class="haupt">Start</button>
+        </div>
+
+        <label class="sr-only" for="zeitskala">Zeitregler über den ganzen Tag, Minuten nach Mitternacht Ortszeit</label>
+        <input type="range" id="zeitskala" min="0" max="1439" step="1" value="720"
+               aria-describedby="sim-utc-anzeige">
+        <div class="sim-zeile">
+          <span class="gross" id="sim-ortszeit">–</span>
+          <span class="chip" id="sim-utc-anzeige">Simulationszeit (UTC): –</span>
+        </div>
+        <p class="szene-text" style="color:var(--text-schwach);font-size:.8rem;margin:4px 0 0">
+          Die Simulationszeit ist eine sichtbare, von dir gesetzte Größe. Sie wird nirgends
+          intern erzeugt — auch nicht beim Start. Sie steht oben als Datum, Uhrzeit und
+          UTC-Wert und lässt sich auf drei Wegen ändern: Datum, Uhrzeit, Zeitregler.
+        </p>
+      </div>
+    </section>
+
+    <!-- ---- Messwerte ---- -->
+    <section class="karte" aria-labelledby="h-mess">
+      <h2 id="h-mess">Messwerte</h2>
+      <table class="tafel">
+        <caption class="sr-only">Sonnenstand, Tagesdaten und die drei getrennten Zeitangaben</caption>
+        <tbody>
+          <tr><th scope="row">Sonnenhöhe</th><td class="zahl" id="m-hoehe">–</td></tr>
+          <tr><th scope="row">Sonnenazimut</th><td class="zahl" id="m-azimut">–</td></tr>
+          <tr><th scope="row">Datum</th><td class="zahl" id="m-datum">–</td></tr>
+          <tr><th scope="row">Tageslänge</th><td class="zahl" id="m-tageslaenge">–</td></tr>
+          <tr><th scope="row">Sonnenaufgang</th><td class="zahl" id="m-aufgang">–</td></tr>
+          <tr><th scope="row">Sonnenuntergang</th><td class="zahl" id="m-untergang">–</td></tr>
+          <tr><th scope="row">Sonnenhöchststand</th><td class="zahl" id="m-hoechststand">–</td></tr>
+          <tr><th scope="row">Sonnendeklination</th><td class="zahl" id="m-deklination">–</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ---- Die drei Zeiten, getrennt ---- -->
+    <section class="karte" aria-labelledby="h-zeiten">
+      <h2 id="h-zeiten">Drei Zeiten — jede mit eigener Ursache</h2>
+
+      <div class="zeile-getrennt">
+        <div class="label">Ortszeit (Zonenzeit)</div>
+        <div class="wert" id="z-ortszeit">–</div>
+        <div class="erklaerung">Reine Uhrzeit der Zeitzone. Verschiebt sich, wenn die
+          Zeitzone wechselt oder — einmal im Jahr — die <b>Sommerzeit</b> beginnt.</div>
+      </div>
+
+      <div class="zeile-getrennt">
+        <div class="label">UTC (koordinierte Weltzeit)</div>
+        <div class="wert" id="z-utc">–</div>
+        <div class="erklaerung">Dieselbe Uhrzeit ohne Zone, mit festem Versatz. Die
+          <b>Sommerzeit</b> ändert ausschließlich den Zonenversatz, nicht die Sonne.</div>
+      </div>
+
+      <div class="zeile-getrennt">
+        <div class="label">Wahre Sonnenzeit</div>
+        <div class="wert" id="z-wahre">–</div>
+        <div class="erklaerung">Das, was die Sonnenuhr tatsächlich anzeigt. Hier wirkt die
+          <b>Zeitgleichung</b> — eine astronomische Größe aus der Erdbahn und der
+          schiefen Erdachse. Sie wirkt an jedem Tag, auch ohne Sommerzeit.</div>
+      </div>
+
+      <table class="tafel" style="margin-top:8px">
+        <caption class="sr-only">Zerlegung von der Ortszeit bis zur wahren Sonnenzeit; jede Zeile ist die Summe der vorigen</caption>
+        <tbody>
+          <tr><th scope="row">Ortszeit (Zonenzeit)</th><td class="zahl" id="z-schritt0">–</td></tr>
+          <tr><th scope="row">± Zonenversatz</th><td class="zahl" id="z-schritt1">–</td></tr>
+          <tr><th scope="row">= mittlere Zeit am Zonenmeridian</th><td class="zahl" id="z-schritt2">–</td></tr>
+          <tr><th scope="row">± Längenfehler</th><td class="zahl" id="z-schritt3">–</td></tr>
+          <tr><th scope="row">= mittlere Ortszeit</th><td class="zahl" id="z-schritt4">–</td></tr>
+          <tr><th scope="row">± Zeitgleichung</th><td class="zahl" id="z-schritt5">–</td></tr>
+          <tr><th scope="row">= wahre Sonnenzeit</th><td class="zahl" id="z-schritt6">–</td></tr>
+        </tbody>
+      </table>
+      <p class="szene-text" id="z-pruefzeile" style="font-size:.78rem;color:var(--text-schwach)"></p>
+
+      <details>
+        <summary>Warum sind das drei verschiedene Ursachen? (Sommerzeit ist nicht die Zeitgleichung)</summary>
+        <p><b>1. Zonenzeit und Sommerzeit — ein Uhr-Thema.</b> Die Zonenzeit richtet sich
+        danach, welche Uhren in einem politischen Gebiet gleich laufen müssen. Damit das
+        aufgeht, teilt man die Erde in 15-Grad-Streifen; jeder Streifen bekommt eine
+        Bezugszeit. Ein Ort liegt dabei fast nie genau auf seinem Streifen — Stuttgart
+        (9,18 Grad O) liegt 5,82 Grad westlich der Bezugslinie der Zone
+        Europe/Berlin (15 Grad O). Das ergibt gut 23 Minuten.</p>
+        <p>Die <b>Sommerzeit</b> schiebt die Uhren eine Stunde vor, damit im Sommer mehr
+        Tageslicht in den Feierabend fällt. Sie verschiebt damit genau eine Größe: den
+        Zonenversatz zwischen Ortszeit und UTC. Sie hat mit der Sonne selbst nichts zu
+        tun — der Sonnenstand zu einem gegebenen UTC-Zeitpunkt bleibt derselbe.</p>
+        <p><b>2. Die Zeitgleichung — ein Astronomie-Thema.</b> Die Erde läuft auf einer
+        Ellipse, nicht auf einem Kreis, und ihre Achse steht schief. Dadurch verschiebt
+        sich der Mittelpunkt der Sonne über den Tag hinweg ein Stück vor und zurück
+        gegenüber der Uhr. Diese Verschiebung heißt <b>Zeitgleichung</b>, sie liegt
+        zwischen etwa −14 und +16 Minuten und ist zweimal im Jahr null. Sie hängt
+        ausschließlich vom Kalenderdatum ab — nicht davon, ob gerade eine Stunde
+        „umgestellt" wurde.</p>
+        <p><b>3. Der Längenfehler — wieder ein Uhr-Thema.</b> Er entsteht allein daraus,
+        dass die Zeitzone ein Breitenzstreifen-Modell ist, und verschwindet, sobald man
+        auf wahre Sonnenzeit umschaltet.</p>
+        <p><b>Kurzform:</b> Sommerzeit verschiebt die Uhr am Stück (Regelwerk),
+        die Zeitgleichung verschiebt die Sonne fein (Astronomie), der Längenfehler
+        verschiebt die Uhr relativ zum eigenen Meridian (Regelwerk). Nur die
+        Zeitgleichung ist ein Naturvorgang.</p>
+      </details>
+    </section>
+
+    <!-- ---- Aufgaben ---- -->
+    <section class="karte" aria-labelledby="h-aufgaben">
+      <h2 id="h-aufgaben">Aufgaben</h2>
+      <div class="aufgaben-wahl" role="group" aria-label="Aufgabe wählen">
+        <button type="button" id="task-btn-1" data-task="aufgabe-1" aria-pressed="true">
+          <span class="nr">Aufgabe 1</span>12-Uhr-Marke
+        </button>
+        <button type="button" id="task-btn-2" data-task="aufgabe-2" aria-pressed="false">
+          <span class="nr">Aufgabe 2</span>Längster Schatten
+        </button>
+        <button type="button" id="task-btn-3" data-task="aufgabe-3" aria-pressed="false">
+          <span class="nr">Aufgabe 3</span>6-Uhr-Marke
+        </button>
+      </div>
+
+      <h3 id="task-titel">–</h3>
+      <p id="task-auftrag" style="font-size:.92rem;margin:4px 0">–</p>
+      <details id="task-hinweis-box">
+        <summary>Anleitung</summary>
+        <p id="task-hinweis">–</p>
+        <p style="margin-bottom:0"><b>Erfolgsbedingung (aus der Rechnung):</b><br>
+          <span id="task-bedingung">–</span></p>
+      </details>
+
+      <div class="feld" style="margin-top:10px">
+        <button type="button" class="haupt" id="task-pruefen">Prüfen (H)</button>
+        <button type="button" id="task-zuruecksetzen">Diese Aufgabe zurücksetzen</button>
+      </div>
+
+      <div class="ergebnis" id="task-ergebnis" role="status" aria-live="polite">–</div>
+      <div class="stand-zeilen" id="task-stand"></div>
+    </section>
+
+    <!-- ---- Speicher, Reset, Hilfe ---- -->
+    <section class="karte" aria-labelledby="h-verwaltung">
+      <h2 id="h-verwaltung">Verwaltung</h2>
+
+      <div class="schalterreihe">
+        <button type="button" id="reset-alles" class="haupt">Alles zurücksetzen</button>
+        <button type="button" id="reset-einstellungen">Nur Einstellungen löschen</button>
+        <button type="button" id="speicher-test">Speicher prüfen</button>
+      </div>
+
+      <div class="feld" style="margin-top:10px">
+        <label style="flex-direction:row;align-items:center;gap:8px">
+          <input type="checkbox" id="speicher-blockieren" style="min-height:auto;width:18px;height:18px">
+          Speicherzugriff simuliert blockiert
+        </label>
+      </div>
+      <p class="hinweis" id="speicher-status" style="margin:4px 0 0">–</p>
+
+      <details id="kbd-box">
+        <summary><svg width="14" height="14" aria-hidden="true"><use href="#sym-tastatur"></use></svg> Tastaturkurzbefehle</summary>
+        <table class="kb-tabelle">
+          <caption class="sr-only">Tastaturkurzbefehle der Schattenwerkstatt</caption>
+          <tbody>
+            <tr><th scope="row"><kbd>Leertaste</kbd></th><td>Simulation starten / anhalten</td></tr>
+            <tr><th scope="row"><kbd>L</kbd></th><td>Zwischen Live-Modus und Simulation wechseln</td></tr>
+            <tr><th scope="row"><kbd>[</kbd> <kbd>]</kbd></th><td>Zeit um 1 Minute zurück / vor (mit <kbd>Umschalt</kbd>: 1 Stunde)</td></tr>
+            <tr><th scope="row"><kbd>Pfeil links</kbd> <kbd>Pfeil rechts</kbd></th><td>Zeit um 10 Minuten zurück / vor</td></tr>
+            <tr><th scope="row"><kbd>Pfeil hoch</kbd> <kbd>Pfeil runter</kbd></th><td>Stab um 5 cm nach Norden / Süden</td></tr>
+            <tr><th scope="row"><kbd>A</kbd> <kbd>D</kbd></th><td>Stab nach Westen / Osten</td></tr>
+            <tr><th scope="row"><kbd>+</kbd> <kbd>−</kbd></th><td>Stab höher / niedriger</td></tr>
+            <tr><th scope="row"><kbd>H</kbd></th><td>Aufgabe prüfen</td></tr>
+            <tr><th scope="row"><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></th><td>Aufgabe 1 / 2 / 3 wählen</td></tr>
+            <tr><th scope="row"><kbd>R</kbd></th><td>Alles zurücksetzen</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-bottom:0">Alle Schaltflächen, Eingabefelder und den Zeitregler
+        erreichst du zusätzlich mit <kbd>Tab</kbd> und <kbd>Umschalt</kbd>+<kbd>Tab</kbd>.
+        Jedes bediente Element zeigt beim Fokus einen hellen Ring.</p>
+      </details>
+
+      <details>
+        <summary>Was setzt „Alles zurücksetzen" genau zurück?</summary>
+        <p>Der große Knopf setzt den <b>Spielzustand</b> auf den Anfangswert zurück:</p>
+        <ul>
+          <li><b>Ort:</b> 48,78 Grad N / 9,18 Grad O, Zeitzone Europe/Berlin (Demo-Ort).</li>
+          <li><b>Zeit:</b> der gerade laufende echte Zeitpunkt, danach die Simulation mit
+              dem Datum des heutigen Tages, der Uhrzeit 12:00 Ortszeit,
+              Geschwindigkeit 15 Minuten pro Sekunde, Status <b>angehalten</b>.</li>
+          <li><b>Aufgabe:</b> Aufgabe 1, alle drei Aufgaben wieder offen, kein Erfolg vermerkt.</li>
+          <li><b>Aufbau:</b> Stab in der Mitte der Marke (0 / 0) mit 90 cm Höhe.</li>
+        </ul>
+        <p>Der Knopf <b>„Nur Einstellungen löschen"</b> fasst den Spielzustand nicht an.
+        Er entfernt ausschließlich die gespeicherten <b>Einstellungen</b>
+        (Ortswahl, zuletzt gewählte Aufgabe, Layoutschalter) aus dem localStorage.
+        Auch diese beiden Zustände sind getrennt, damit ein Fehler im Speicher den
+        Spielbetrieb nicht zerstören kann.</p>
+      </details>
+
+      <details>
+        <summary>Wie wird geprüft, dass die App auch ohne localStorage läuft?</summary>
+        <p>Kästchen <b>„Speicherzugriff simuliert blockiert"</b> setzt den Speicher intern
+        auf einen Zustand, in dem <b>jeder</b> Zugriff absichtlich eine Ausnahme wirft —
+        genau wie in einem Browser, der den Speicher verweigert. Danach funktionieren
+        Ort, Zeit, Schatten und Aufgaben weiter; nur die Einstellungen gelten dann nur
+        für diese Sitzung. <b>„Speicher prüfen"</b> schreibt einen Wert, liest ihn zurück
+        und schreibt das Ergebnis samt Ausnahme in die Zeile über dem Knopf.
+        Das ist der dokumentierte Testpunkt — kein bloßes Versprechen. Zwei weitere
+        Wege führen zum selben Nachweis: ein Browser, der localStorage tatsächlich
+        verweigert (z. B. blockierte Third-Party-Speicher), oder ein Verzeichnis ohne
+        Schreibrecht beim Profilzugriff.</p>
+      </details>
+    </section>
+
+  </div>
+</main>
+
+<footer class="fuss">
+  <p>Schattenwerkstatt · Alle Werte stammen aus der Sonnenrechnung, nicht aus einer Skizze.
+  Koordinaten: x nach Osten, y nach Norden, z nach oben. Azimut 0° = Norden, 90° = Osten.
+  1 Szeneneinheit = 1 cm.</p>
+  <p id="fuss-engine"></p>
+</footer>
+
+<!-- Klassische Skripte, in dieser Reihenfolge. Keine Module, kein fetch. -->
+<script src="engine-adapter.js"></script>
+<script src="storage.js"></script>
+<script src="tasks.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
